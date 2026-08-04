@@ -1,0 +1,1590 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Winfolio OS</title>
+  <style>
+    :root {
+      --taskbar-h: 46px;
+      --blue: #0a64ad;
+      --blue-dark: #063b78;
+      --panel: #f4f7fb;
+      --text: #101828;
+      --muted: #667085;
+      --border: #bfd0e3;
+      --shadow: 0 24px 70px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #071b3a;
+      color: white;
+      user-select: none;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .boot-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(70,130,255,.22), transparent 30%),
+        radial-gradient(circle at 70% 80%, rgba(0,255,213,.14), transparent 32%),
+        #050816;
+      transition: opacity .55s ease;
+    }
+
+    .boot-card {
+      width: min(420px, 88vw);
+      padding: 34px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 30px 80px rgba(0,0,0,.45);
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .boot-logo {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 18px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 42px;
+      background: linear-gradient(135deg, #46a7ff, #0a64ad);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+    }
+
+    .progress {
+      height: 12px;
+      margin-top: 22px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255,255,255,.14);
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #72e6ff, #79ffb7);
+      transition: width .18s ease;
+    }
+
+    .desktop {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 16% 24%, rgba(105,178,255,.38), transparent 25%),
+        radial-gradient(circle at 84% 18%, rgba(71,255,199,.18), transparent 24%),
+        radial-gradient(circle at 72% 72%, rgba(255,255,255,.10), transparent 34%),
+        linear-gradient(135deg, #071b3a 0%, #083c78 55%, #0a7aa5 100%);
+    }
+
+    .desktop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.6), rgba(0,0,0,.12));
+    }
+
+    .desktop-hint {
+      position: absolute;
+      right: 18px;
+      bottom: calc(var(--taskbar-h) + 14px);
+      z-index: 1;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.16);
+      color: rgba(255,255,255,.82);
+      font-size: 13px;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+    }
+
+    .desktop-icons {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(2, 88px);
+      grid-auto-rows: 92px;
+      gap: 10px 12px;
+    }
+
+    .desktop-icon {
+      width: 88px;
+      height: 92px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      text-shadow: 0 2px 8px rgba(0,0,0,.55);
+    }
+
+    .desktop-icon:hover {
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.2);
+    }
+
+    .desktop-icon:active {
+      transform: translateY(1px);
+    }
+
+    .icon-emoji {
+      font-size: 35px;
+      line-height: 1;
+      filter: drop-shadow(0 5px 8px rgba(0,0,0,.34));
+    }
+
+    .icon-label {
+      margin-top: 7px;
+      max-width: 82px;
+      font-size: 12px;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    #windowsLayer {
+      position: absolute;
+      inset: 0 0 var(--taskbar-h) 0;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .window {
+      position: absolute;
+      width: min(720px, calc(100vw - 30px));
+      height: 460px;
+      min-width: 310px;
+      min-height: 230px;
+      resize: both;
+      overflow: hidden;
+      pointer-events: auto;
+      border-radius: 12px;
+      border: 1px solid #0b3f7a;
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .window.active {
+      box-shadow: 0 28px 90px rgba(0,0,0,.48);
+    }
+
+    .window.maximized {
+      resize: none;
+      border-radius: 0;
+    }
+
+    .window.minimized {
+      display: none;
+    }
+
+    .titlebar {
+      height: 36px;
+      padding: 0 8px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: white;
+      cursor: move;
+      background: linear-gradient(180deg, #1578c9, #07539f);
+    }
+
+    .window.active .titlebar {
+      background: linear-gradient(180deg, #1b8be9, #0759aa);
+    }
+
+    .titlebar-title {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .win-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .win-btn {
+      width: 30px;
+      height: 24px;
+      border: 0;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      background: rgba(255,255,255,.15);
+    }
+
+    .win-btn:hover {
+      background: rgba(255,255,255,.28);
+    }
+
+    .win-btn.close:hover {
+      background: #e81123;
+    }
+
+    .window-body {
+      height: calc(100% - 36px);
+      padding: 18px;
+      overflow: auto;
+      user-select: text;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 112px;
+      height: 112px;
+      border-radius: 28px;
+      display: grid;
+      place-items: center;
+      font-size: 42px;
+      color: white;
+      background: linear-gradient(135deg, #0a64ad, #38bdf8);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.28);
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 { margin-bottom: 6px; }
+    h2 { margin-bottom: 12px; }
+    h3 { margin-bottom: 8px; }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 15px;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid #d7e2ee;
+      box-shadow: 0 10px 30px rgba(15,23,42,.06);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #eaf4ff;
+      color: #07539f;
+      border: 1px solid #c9e3ff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--blue);
+      background: var(--blue);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      text-decoration: none;
+      background: #07539f;
+    }
+
+    .btn.secondary {
+      color: var(--blue);
+      background: white;
+      border-color: #bdd7ef;
+    }
+
+    .btn.secondary:hover {
+      background: #eff7ff;
+    }
+
+    .project-card {
+      display: grid;
+      gap: 8px;
+    }
+
+    .project-card h3 {
+      margin-bottom: 0;
+    }
+
+    .contact-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .contact-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .input, .textarea {
+      width: 100%;
+      border: 1px solid #ccd8e5;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    .textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .input:focus, .textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(10,100,173,.12);
+    }
+
+    .pdf-viewer {
+      width: 100%;
+      height: 330px;
+      border: 1px solid #ccd8e5;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .calculator {
+      max-width: 310px;
+      margin: 0 auto;
+    }
+
+    .calc-display {
+      width: 100%;
+      height: 58px;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border: 1px solid #ccd8e5;
+      border-radius: 12px;
+      background: #101828;
+      color: #eafff4;
+      font-size: 26px;
+      text-align: right;
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .calc-btn {
+      min-height: 48px;
+      border: 0;
+      border-radius: 11px;
+      background: #e8eef6;
+      color: #101828;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .calc-btn:hover {
+      background: #dce8f5;
+    }
+
+    .calc-btn.op {
+      background: #cfe7ff;
+      color: #07539f;
+    }
+
+    .calc-btn.eq {
+      grid-column: span 2;
+      background: var(--blue);
+      color: white;
+    }
+
+    .notes textarea {
+      width: 100%;
+      height: 260px;
+      border-radius: 12px;
+      border: 1px solid #ccd8e5;
+      padding: 12px;
+      resize: none;
+      outline: none;
+      background:
+        linear-gradient(#fff 29px, #eef4fb 30px);
+      background-size: 100% 30px;
+      line-height: 30px;
+      color: var(--text);
+    }
+
+    .terminal {
+      height: 100%;
+      min-height: 270px;
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      background: #050505;
+      color: #a7ff83;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      user-select: text;
+    }
+
+    .terminal a {
+      color: #79d7ff;
+    }
+
+    .terminal-line {
+      margin: 0 0 7px;
+      white-space: pre-wrap;
+    }
+
+    .terminal-input-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .terminal-prompt {
+      color: #79d7ff;
+      white-space: nowrap;
+    }
+
+    .terminal input {
+      flex: 1;
+      min-width: 120px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #a7ff83;
+      font: inherit;
+    }
+
+    .ttt {
+      max-width: 370px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .ttt-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .ttt-cell {
+      aspect-ratio: 1 / 1;
+      border: 0;
+      border-radius: 14px;
+      background: #eaf4ff;
+      color: #07539f;
+      font-size: 38px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .ttt-cell:hover {
+      background: #d7ecff;
+    }
+
+    .taskbar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--taskbar-h);
+      z-index: 4000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: linear-gradient(180deg, rgba(20,91,172,.94), rgba(8,56,128,.96));
+      border-top: 1px solid rgba(255,255,255,.25);
+      backdrop-filter: blur(14px);
+    }
+
+    .start-btn {
+      height: 34px;
+      padding: 0 14px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(180deg, #43b66d, #16823d);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .start-btn:hover {
+      filter: brightness(1.08);
+    }
+
+    .task-buttons {
+      flex: 1;
+      display: flex;
+      gap: 7px;
+      min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .task-btn {
+      max-width: 180px;
+      min-width: 120px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.12);
+      color: white;
+      cursor: pointer;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-btn.active {
+      background: rgba(255,255,255,.27);
+      border-color: rgba(255,255,255,.38);
+    }
+
+    .tray {
+      min-width: 86px;
+      text-align: right;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .start-menu {
+      position: absolute;
+      left: 8px;
+      bottom: calc(var(--taskbar-h) + 8px);
+      width: 292px;
+      z-index: 5000;
+      display: none;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(245,248,252,.94);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.45);
+      box-shadow: 0 24px 70px rgba(0,0,0,.36);
+      backdrop-filter: blur(18px);
+    }
+
+    .start-menu.open {
+      display: block;
+    }
+
+    .menu-header {
+      padding: 16px;
+      color: white;
+      background: linear-gradient(135deg, #0a64ad, #36a3ff);
+    }
+
+    .menu-header strong {
+      display: block;
+      font-size: 17px;
+    }
+
+    .menu-header span {
+      font-size: 12px;
+      opacity: .88;
+    }
+
+    .menu-items {
+      padding: 8px;
+    }
+
+    .menu-item {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    .menu-item:hover {
+      background: #e8f2ff;
+    }
+
+    .menu-footer {
+      padding: 10px 14px 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .desktop-icons {
+        grid-template-columns: 88px;
+      }
+
+      .desktop-hint {
+        display: none;
+      }
+
+      .window {
+        left: 10px !important;
+        top: 12px !important;
+        width: calc(100vw - 20px) !important;
+        height: calc(100vh - var(--taskbar-h) - 24px) !important;
+        resize: none;
+      }
+
+      .grid.two,
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .avatar {
+        width: 86px;
+        height: 86px;
+        border-radius: 22px;
+        font-size: 32px;
+      }
+
+      .task-btn {
+        min-width: 92px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-card">
+      <div class="boot-logo">🪟</div>
+      <h1>Winfolio OS</h1>
+      <p class="muted" style="color:rgba(255,255,255,.7)">Booting your portfolio desktop...</p>
+      <div class="progress"><span id="bootBar"></span></div>
+    </div>
+  </div>
+
+  <main class="desktop" id="desktop">
+    <div class="desktop-icons" id="desktopIcons"></div>
+    <div id="windowsLayer"></div>
+
+    <div class="desktop-hint">Click an icon to open an app</div>
+
+    <section class="start-menu" id="startMenu">
+      <div class="menu-header">
+        <strong id="menuName">Portfolio</strong>
+        <span>Start menu</span>
+      </div>
+      <div class="menu-items" id="menuItems"></div>
+      <div class="menu-footer">
+        Windows-inspired portfolio UI. Replace content in the PROFILE object.
+      </div>
+    </section>
+
+    <footer class="taskbar">
+      <button class="start-btn" id="startBtn">Start</button>
+      <div class="task-buttons" id="taskButtons"></div>
+      <div class="tray" id="clock"></div>
+    </footer>
+  </main>
+
+  <script>
+    const PROFILE = {
+      name: "Bilal Rauf",
+      role: "Full-Stack Developer",
+      location: "Pakistan",
+      email: "your.email@example.com",
+      cvFile: "Bilal_Rauf_CV.pdf",
+      summary:
+        "I build clean, practical web apps with strong UX, maintainable code, and backend APIs that actually work well in production.",
+      links: {
+        github: "https://github.com/bilal-rauf-dev",
+        linkedin: "https://www.linkedin.com/in/bilal-rauf-dev",
+        portfolio: "https://bilal-rauf-dev.github.io/Bilal-Rauf"
+      },
+      skills: {
+        Frontend: ["HTML", "CSS", "JavaScript", "React", "Next.js", "Tailwind CSS", "Responsive UI"],
+        Backend: ["Node.js", "Express", "REST APIs", "Authentication", "API Design"],
+        Databases: ["MongoDB", "SQL", "PostgreSQL", "Data Modeling"],
+        Tools: ["Git", "GitHub", "Vercel", "Postman", "VS Code"]
+      },
+      projects: [
+        {
+          name: "Hostel Hub",
+          description: "A hostel-focused web app for discovery, booking, and management workflows.",
+          url: "https://hostel-hub-ten.vercel.app/",
+          tags: ["Full-stack", "Vercel", "Web App"]
+        },
+        {
+          name: "Taskflow API",
+          description: "A task-management API project with structured routes and backend logic.",
+          url: "https://github.com/bilal-rauf-dev/taskflow-api",
+          tags: ["Node.js", "Express", "REST API"]
+        },
+        {
+          name: "AI Hackathon Submission",
+          description: "Hackathon project built around AI-assisted workflows and problem solving.",
+          url: "https://github.com/Build-with-AI-FAST-CFD-26/ai-hackathon-submission-bz-force",
+          tags: ["AI", "Hackathon", "Team Project"]
+        },
+        {
+          name: "Personal Portfolio",
+          description: "A developer portfolio for projects, skills, and contact information.",
+          url: "https://bilal-rauf-dev.github.io/Bilal-Rauf",
+          tags: ["Portfolio", "Frontend"]
+        }
+      ]
+    };
+
+    const desktopAppIds = [
+      "about",
+      "skills",
+      "projects",
+      "contact",
+      "cv",
+      "terminal",
+      "calculator",
+      "notes",
+      "game"
+    ];
+
+    const APP_DEFS = {
+      about: {
+        title: "About Me",
+        icon: "👤",
+        width: "720px",
+        height: "470px",
+        render: () => `
+          <div class="hero">
+            <div>
+              <h1>${PROFILE.name}</h1>
+              <p class="muted"><strong>${PROFILE.role}</strong> · ${PROFILE.location}</p>
+              <p>${PROFILE.summary}</p>
+              <div class="btn-row">
+                <a class="btn" href="${PROFILE.links.github}" target="_blank" rel="noreferrer">GitHub</a>
+                <a class="btn secondary" href="${PROFILE.links.linkedin}" target="_blank" rel="noreferrer">LinkedIn</a>
+                <a class="btn secondary" href="${PROFILE.links.portfolio}" target="_blank" rel="noreferrer">Website</a>
+              </div>
+            </div>
+            <div class="avatar">BR</div>
+          </div>
+
+          <div class="grid two" style="margin-top:18px">
+            <div class="card">
+              <h3>What I do</h3>
+              <p class="muted">I create portfolio sites, dashboards, APIs, authentication flows, and project-ready web apps.</p>
+            </div>
+            <div class="card">
+              <h3>This website</h3>
+              <p class="muted">A playful desktop simulation with draggable windows, apps, games, calculator, notes, taskbar, and start menu.</p>
+            </div>
+          </div>
+        `
+      },
+
+      skills: {
+        title: "Skills",
+        icon: "🧰",
+        width: "700px",
+        height: "450px",
+        render: () => `
+          <h2>Skills</h2>
+          <p class="muted">Grouped by area. Edit these in the PROFILE object.</p>
+          <div class="grid two">
+            ${Object.entries(PROFILE.skills).map(([group, items]) => `
+              <div class="card">
+                <h3>${group}</h3>
+                <div class="chips">
+                  ${items.map(item => `<span class="chip">${item}</span>`).join("")}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `
+      },
+
+      projects: {
+        title: "Projects",
+        icon: "📁",
+        width: "760px",
+        height: "500px",
+        render: () => `
+          <h2>Projects</h2>
+          <p class="muted">A few highlighted projects from the desktop.</p>
+          <div class="grid two">
+            ${PROFILE.projects.map(project => `
+              <article class="card project-card">
+                <h3>${project.name}</h3>
+                <p class="muted">${project.description}</p>
+                <div class="chips">
+                  ${project.tags.map(tag => `<span class="chip">${tag}</span>`).join("")}
+                </div>
+                <a href="${project.url}" target="_blank" rel="noreferrer">Open project →</a>
+              </article>
+            `).join("")}
+          </div>
+        `
+      },
+
+      contact: {
+        title: "Contact",
+        icon: "✉️",
+        width: "640px",
+        height: "460px",
+        render: () => `
+          <h2>Contact</h2>
+          <div class="grid two">
+            <div class="card">
+              <h3>Find me online</h3>
+              <ul class="contact-list">
+                <li>📧 <a href="mailto:${PROFILE.email}">${PROFILE.email}</a></li>
+                <li>💼 <a href="${PROFILE.links.linkedin}" target="_blank" rel="noreferrer">LinkedIn</a></li>
+                <li>💻 <a href="${PROFILE.links.github}" target="_blank" rel="noreferrer">GitHub</a></li>
+                <li>🌐 <a href="${PROFILE.links.portfolio}" target="_blank" rel="noreferrer">Portfolio</a></li>
+              </ul>
+            </div>
+
+            <form class="card contact-form">
+              <h3>Quick message</h3>
+              <input class="input" name="name" placeholder="Your name" required />
+              <input class="input" name="email" type="email" placeholder="Your email" required />
+              <textarea class="textarea" name="message" placeholder="Message" required></textarea>
+              <button class="btn" type="submit">Open email draft</button>
+              <small class="muted">This demo form opens your mail client.</small>
+            </form>
+          </div>
+        `,
+        afterOpen: win => {
+          if (win.dataset.contactMounted) return;
+          win.dataset.contactMounted = "true";
+
+          const form = win.querySelector(".contact-form");
+          form.addEventListener("submit", event => {
+            event.preventDefault();
+            const data = new FormData(form);
+            const subject = encodeURIComponent(`Portfolio message from ${data.get("name")}`);
+            const body = encodeURIComponent(
+              `Name: ${data.get("name")}\nEmail: ${data.get("email")}\n\n${data.get("message")}`
+            );
+            window.location.href = `mailto:${PROFILE.email}?subject=${subject}&body=${body}`;
+          });
+        }
+      },
+
+      cv: {
+        title: "CV",
+        icon: "📄",
+        width: "760px",
+        height: "540px",
+        render: () => `
+          <h2>CV</h2>
+          <p class="muted">
+            Put your PDF in the same folder as this HTML file and name it
+            <code>${PROFILE.cvFile}</code>.
+          </p>
+          <div class="btn-row" style="margin-bottom:14px">
+            <a class="btn" href="${PROFILE.cvFile}" target="_blank" rel="noreferrer">Open CV</a>
+            <a class="btn secondary" href="${PROFILE.cvFile}" download>Download CV</a>
+          </div>
+          <object class="pdf-viewer" data="${PROFILE.cvFile}" type="application/pdf">
+            <p>PDF preview unavailable. <a href="${PROFILE.cvFile}" target="_blank">Open the CV here.</a></p>
+          </object>
+        `
+      },
+
+      terminal: {
+        title: "Terminal",
+        icon: "💻",
+        width: "650px",
+        height: "400px",
+        render: () => `
+          <div class="terminal">
+            <div class="terminal-output">
+              <p class="terminal-line">Winfolio Terminal v1.0</p>
+              <p class="terminal-line">Type <strong>help</strong> to see commands.</p>
+            </div>
+            <div class="terminal-input-row">
+              <span class="terminal-prompt">guest@winfolio:~$</span>
+              <input class="terminal-input" autocomplete="off" spellcheck="false" />
+            </div>
+          </div>
+        `,
+        afterOpen: win => mountTerminal(win)
+      },
+
+      calculator: {
+        title: "Calculator",
+        icon: "🧮",
+        width: "340px",
+        height: "455px",
+        render: () => `
+          <div class="calculator">
+            <input class="calc-display" value="0" readonly />
+            <div class="calc-grid">
+              ${["C","⌫","%","/","7","8","9","*","4","5","6","-","1","2","3","+","0",".","="]
+                .map(value => {
+                  const label = value === "/" ? "÷" : value === "*" ? "×" : value;
+                  const cls = value === "=" ? "calc-btn eq" : ["+","-","*","/","%"].includes(value) ? "calc-btn op" : "calc-btn";
+                  return `<button class="${cls}" data-calc="${value}">${label}</button>`;
+                }).join("")}
+            </div>
+          </div>
+        `,
+        afterOpen: win => mountCalculator(win)
+      },
+
+      notes: {
+        title: "Notes",
+        icon: "📝",
+        width: "520px",
+        height: "420px",
+        render: () => `
+          <div class="notes">
+            <h2>Notes</h2>
+            <p class="muted">Autosaves in your browser.</p>
+            <textarea spellcheck="true"></textarea>
+          </div>
+        `,
+        afterOpen: win => mountNotes(win)
+      },
+
+      game: {
+        title: "Tic Tac Toe",
+        icon: "🎮",
+        width: "420px",
+        height: "470px",
+        render: () => `
+          <div class="ttt">
+            <h2>Tic Tac Toe</h2>
+            <p class="muted">You are X. The computer is O.</p>
+            <strong class="ttt-status">Your turn.</strong>
+            <div class="ttt-board">
+              ${Array.from({ length: 9 }, (_, i) => `<button class="ttt-cell" data-cell="${i}"></button>`).join("")}
+            </div>
+            <button class="btn secondary ttt-reset">Reset game</button>
+          </div>
+        `,
+        afterOpen: win => mountGame(win)
+      }
+    };
+
+    const desktopIcons = document.getElementById("desktopIcons");
+    const windowsLayer = document.getElementById("windowsLayer");
+    const taskButtons = document.getElementById("taskButtons");
+    const startBtn = document.getElementById("startBtn");
+    const startMenu = document.getElementById("startMenu");
+    const menuItems = document.getElementById("menuItems");
+    const clock = document.getElementById("clock");
+
+    const openWindows = new Map();
+    const taskButtonMap = new Map();
+
+    let zCounter = 20;
+    let activeAppId = null;
+
+    function renderDesktopIcons() {
+      desktopIcons.innerHTML = desktopAppIds.map(id => {
+        const app = APP_DEFS[id];
+        return `
+          <button class="desktop-icon" data-open="${id}" title="Open ${app.title}">
+            <span class="icon-emoji">${app.icon}</span>
+            <span class="icon-label">${app.title}</span>
+          </button>
+        `;
+      }).join("");
+
+      desktopIcons.querySelectorAll("[data-open]").forEach(icon => {
+        icon.addEventListener("click", () => openApp(icon.dataset.open));
+      });
+    }
+
+    function renderStartMenu() {
+      document.getElementById("menuName").textContent = PROFILE.name;
+
+      menuItems.innerHTML = desktopAppIds.map(id => {
+        const app = APP_DEFS[id];
+        return `
+          <button class="menu-item" data-open="${id}">
+            <span>${app.icon}</span>
+            <span>${app.title}</span>
+          </button>
+        `;
+      }).join("");
+
+      menuItems.querySelectorAll("[data-open]").forEach(item => {
+        item.addEventListener("click", () => {
+          openApp(item.dataset.open);
+          startMenu.classList.remove("open");
+        });
+      });
+    }
+
+    function openApp(appId) {
+      const existing = openWindows.get(appId);
+
+      if (existing) {
+        existing.classList.remove("minimized");
+        focusWindow(existing);
+        return;
+      }
+
+      const app = APP_DEFS[appId];
+      const win = document.createElement("section");
+      win.className = "window";
+      win.dataset.appId = appId;
+      win.style.width = app.width || "680px";
+      win.style.height = app.height || "440px";
+
+      const offset = openWindows.size % 7;
+      win.style.left = `${150 + offset * 34}px`;
+      win.style.top = `${58 + offset * 28}px`;
+
+      win.innerHTML = `
+        <header class="titlebar">
+          <div class="titlebar-title">
+            <span>${app.icon}</span>
+            <span>${app.title}</span>
+          </div>
+          <div class="win-actions">
+            <button class="win-btn minimize" title="Minimize">—</button>
+            <button class="win-btn maximize" title="Maximize">□</button>
+            <button class="win-btn close" title="Close">×</button>
+          </div>
+        </header>
+        <div class="window-body">${app.render()}</div>
+      `;
+
+      windowsLayer.appendChild(win);
+      openWindows.set(appId, win);
+
+      wireWindowControls(win);
+      makeDraggable(win, win.querySelector(".titlebar"));
+      createTaskButton(appId);
+      focusWindow(win);
+
+      if (app.afterOpen) app.afterOpen(win);
+    }
+
+    function wireWindowControls(win) {
+      const appId = win.dataset.appId;
+
+      win.addEventListener("pointerdown", () => focusWindow(win));
+
+      win.querySelector(".close").addEventListener("click", event => {
+        event.stopPropagation();
+        closeWindow(appId);
+      });
+
+      win.querySelector(".minimize").addEventListener("click", event => {
+        event.stopPropagation();
+        minimizeWindow(appId);
+      });
+
+      win.querySelector(".maximize").addEventListener("click", event => {
+        event.stopPropagation();
+        toggleMaximize(win);
+      });
+    }
+
+    function createTaskButton(appId) {
+      const app = APP_DEFS[appId];
+      const btn = document.createElement("button");
+      btn.className = "task-btn";
+      btn.dataset.appId = appId;
+      btn.innerHTML = `${app.icon} ${app.title}`;
+
+      btn.addEventListener("click", () => {
+        const win = openWindows.get(appId);
+        if (!win) return;
+
+        if (win.classList.contains("minimized")) {
+          win.classList.remove("minimized");
+          focusWindow(win);
+          return;
+        }
+
+        if (activeAppId === appId) {
+          minimizeWindow(appId);
+        } else {
+          focusWindow(win);
+        }
+      });
+
+      taskButtons.appendChild(btn);
+      taskButtonMap.set(appId, btn);
+    }
+
+    function focusWindow(win) {
+      const appId = win.dataset.appId;
+      activeAppId = appId;
+      win.classList.remove("minimized");
+      win.style.zIndex = ++zCounter;
+
+      document.querySelectorAll(".window").forEach(w => w.classList.remove("active"));
+      win.classList.add("active");
+
+      taskButtonMap.forEach(btn => btn.classList.remove("active"));
+      const btn = taskButtonMap.get(appId);
+      if (btn) btn.classList.add("active");
+    }
+
+    function closeWindow(appId) {
+      const win = openWindows.get(appId);
+      const btn = taskButtonMap.get(appId);
+
+      if (win) win.remove();
+      if (btn) btn.remove();
+
+      openWindows.delete(appId);
+      taskButtonMap.delete(appId);
+
+      if (activeAppId === appId) activeAppId = null;
+    }
+
+    function minimizeWindow(appId) {
+      const win = openWindows.get(appId);
+      if (!win) return;
+
+      win.classList.add("minimized");
+      win.classList.remove("active");
+
+      const btn = taskButtonMap.get(appId);
+      if (btn) btn.classList.remove("active");
+
+      if (activeAppId === appId) activeAppId = null;
+    }
+
+    function toggleMaximize(win) {
+      if (win.classList.contains("maximized")) {
+        const prev = JSON.parse(win.dataset.prevRect || "{}");
+        win.style.left = prev.left || "150px";
+        win.style.top = prev.top || "58px";
+        win.style.width = prev.width || "680px";
+        win.style.height = prev.height || "440px";
+        win.classList.remove("maximized");
+        return;
+      }
+
+      win.dataset.prevRect = JSON.stringify({
+        left: win.style.left,
+        top: win.style.top,
+        width: win.style.width,
+        height: win.style.height
+      });
+
+      win.style.left = "0";
+      win.style.top = "0";
+      win.style.width = "100vw";
+      win.style.height = "calc(100vh - var(--taskbar-h))";
+      win.classList.add("maximized");
+      focusWindow(win);
+    }
+
+    function makeDraggable(win, handle) {
+      let dragging = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      handle.addEventListener("pointerdown", event => {
+        if (event.target.closest("button")) return;
+        if (win.classList.contains("maximized")) return;
+
+        dragging = true;
+        focusWindow(win);
+
+        startX = event.clientX;
+        startY = event.clientY;
+        startLeft = parseFloat(win.style.left) || 0;
+        startTop = parseFloat(win.style.top) || 0;
+
+        handle.setPointerCapture(event.pointerId);
+      });
+
+      handle.addEventListener("pointermove", event => {
+        if (!dragging) return;
+
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+
+        const maxLeft = window.innerWidth - 90;
+        const maxTop = window.innerHeight - 80;
+
+        win.style.left = `${clamp(startLeft + dx, -win.offsetWidth + 80, maxLeft)}px`;
+        win.style.top = `${clamp(startTop + dy, 0, maxTop)}px`;
+      });
+
+      handle.addEventListener("pointerup", () => {
+        dragging = false;
+      });
+
+      handle.addEventListener("pointercancel", () => {
+        dragging = false;
+      });
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function mountTerminal(win) {
+      if (win.dataset.terminalMounted) return;
+      win.dataset.terminalMounted = "true";
+
+      const terminal = win.querySelector(".terminal");
+      const output = win.querySelector(".terminal-output");
+      const input = win.querySelector(".terminal-input");
+
+      const print = html => {
+        output.insertAdjacentHTML("beforeend", `<p class="terminal-line">${html}</p>`);
+        terminal.scrollTop = terminal.scrollHeight;
+      };
+
+      const commands = {
+        help: () => `
+Available commands:
+help, about, skills, projects, contact, links, clear
+        `,
+        about: () => PROFILE.summary,
+        skills: () => Object.entries(PROFILE.skills)
+          .map(([group, items]) => `${group}: ${items.join(", ")}`)
+          .join("<br>"),
+        projects: () => PROFILE.projects
+          .map(project => `• <a href="${project.url}" target="_blank">${project.name}</a>`)
+          .join("<br>"),
+        contact: () => `
+Email: <a href="mailto:${PROFILE.email}">${PROFILE.email}</a><br>
+LinkedIn: <a href="${PROFILE.links.linkedin}" target="_blank">${PROFILE.links.linkedin}</a>
+        `,
+        links: () => `
+GitHub: <a href="${PROFILE.links.github}" target="_blank">${PROFILE.links.github}</a><br>
+Portfolio: <a href="${PROFILE.links.portfolio}" target="_blank">${PROFILE.links.portfolio}</a>
+        `
+      };
+
+      input.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+
+        const command = input.value.trim().toLowerCase();
+        print(`<span class="terminal-prompt">guest@winfolio:~$</span> ${command}`);
+        input.value = "";
+
+        if (!command) return;
+
+        if (command === "clear") {
+          output.innerHTML = "";
+          return;
+        }
+
+        if (commands[command]) {
+          print(commands[command]());
+        } else {
+          print(`Command not found: ${command}. Type <strong>help</strong>.`);
+        }
+      });
+
+      setTimeout(() => input.focus(), 50);
+    }
+
+    function mountCalculator(win) {
+      if (win.dataset.calcMounted) return;
+      win.dataset.calcMounted = "true";
+
+      const display = win.querySelector(".calc-display");
+      let expression = "";
+
+      const update = () => {
+        display.value = expression || "0";
+      };
+
+      win.querySelectorAll("[data-calc]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const value = btn.dataset.calc;
+
+          if (value === "C") {
+            expression = "";
+          } else if (value === "⌫") {
+            expression = expression.slice(0, -1);
+          } else if (value === "=") {
+            try {
+              if (!/^[0-9+\-*/().%\s]+$/.test(expression)) {
+                throw new Error("Invalid expression");
+              }
+
+              const normalized = expression.replace(/(\d+(\.\d+)?)%/g, "($1/100)");
+              const result = Function(`"use strict"; return (${normalized})`)();
+
+              expression = Number.isFinite(result)
+                ? String(Math.round(result * 100000000) / 100000000)
+                : "";
+            } catch {
+              expression = "Error";
+              setTimeout(() => {
+                expression = "";
+                update();
+              }, 900);
+            }
+          } else {
+            if (expression === "Error") expression = "";
+            expression += value;
+          }
+
+          update();
+        });
+      });
+    }
+
+    function mountNotes(win) {
+      if (win.dataset.notesMounted) return;
+      win.dataset.notesMounted = "true";
+
+      const textarea = win.querySelector("textarea");
+      const key = "winfolio-notes";
+
+      textarea.value =
+        localStorage.getItem(key) ||
+        "Welcome to Notes. Write ideas, todos, or portfolio copy here.";
+
+      textarea.addEventListener("input", () => {
+        localStorage.setItem(key, textarea.value);
+      });
+    }
+
+    function mountGame(win) {
+      if (win.dataset.gameMounted) return;
+      win.dataset.gameMounted = "true";
+
+      const status = win.querySelector(".ttt-status");
+      const cells = Array.from(win.querySelectorAll(".ttt-cell"));
+      const reset = win.querySelector(".ttt-reset");
+
+      let board = Array(9).fill("");
+      let locked = false;
+
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+
+      function checkWinner() {
+        for (const [a,b,c] of wins) {
+          if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            return board[a];
+          }
+        }
+
+        if (board.every(Boolean)) return "draw";
+        return null;
+      }
+
+      function render() {
+        cells.forEach((cell, index) => {
+          cell.textContent = board[index];
+        });
+
+        const winner = checkWinner();
+
+        if (winner === "X") {
+          status.textContent = "You win!";
+          locked = true;
+        } else if (winner === "O") {
+          status.textContent = "Computer wins.";
+          locked = true;
+        } else if (winner === "draw") {
+          status.textContent = "Draw game.";
+          locked = true;
+        } else {
+          status.textContent = locked ? "Computer thinking..." : "Your turn.";
+        }
+      }
+
+      function findMove(mark) {
+        for (const [a,b,c] of wins) {
+          const line = [board[a], board[b], board[c]];
+          if (line.filter(v => v === mark).length === 2 && line.includes("")) {
+            return [a,b,c][line.indexOf("")];
+          }
+        }
+        return null;
+      }
+
+      function botMove() {
+        if (checkWinner()) return;
+
+        let move =
+          findMove("O") ??
+          findMove("X") ??
+          (board[4] === "" ? 4 : null);
+
+        if (move === null) {
+          const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
+          move = empty[Math.floor(Math.random() * empty.length)];
+        }
+
+        board[move] = "O";
+        locked = false;
+        render();
+      }
+
+      cells.forEach(cell => {
+        cell.addEventListener("click", () => {
+          const index = Number(cell.dataset.cell);
+          if (locked || board[index]) return;
+
+          board[index] = "X";
+          locked = true;
+          render();
+
+          if (!checkWinner()) {
+            setTimeout(botMove, 450);
+          }
+        });
+      });
+
+      reset.addEventListener("click", () => {
+        board = Array(9).fill("");
+        locked = false;
+        render();
+      });
+
+      render();
+    }
+
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function boot() {
+      const bootScreen = document.getElementById("bootScreen");
+      const bootBar = document.getElementById("bootBar");
+      let progress = 0;
+
+      const timer = setInterval(() => {
+        progress += Math.random() * 18 + 7;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(timer);
+
+          setTimeout(() => {
+            bootScreen.style.opacity = "0";
+            setTimeout(() => {
+              bootScreen.style.display = "none";
+            }, 560);
+          }, 280);
+        }
+
+        bootBar.style.width = `${progress}%`;
+      }, 150);
+    }
+
+    startBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      startMenu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", event => {
+      if (!startMenu.contains(event.target) && event.target !== startBtn) {
+        startMenu.classList.remove("open");
+      }
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        startMenu.classList.remove("open");
+      }
+    });
+
+    renderDesktopIcons();
+    renderStartMenu();
+    updateClock();
+    setInterval(updateClock, 1000);
+    boot();
+  </script>
+</body>
+</html>
