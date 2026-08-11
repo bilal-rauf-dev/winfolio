@@ -9,15 +9,24 @@
       --taskbar-h: 46px;
       --blue: #0a64ad;
       --blue-dark: #063b78;
+      --blue-light: #1b8be9;
       --panel: #f4f7fb;
       --text: #101828;
       --muted: #667085;
       --border: #bfd0e3;
       --shadow: 0 24px 70px rgba(0,0,0,.35);
+      --wallpaper-base: linear-gradient(135deg, #071b3a 0%, #083c78 55%, #0a7aa5 100%);
     }
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
+
+    body.reduce-motion *,
+    body.reduce-motion *::before,
+    body.reduce-motion *::after {
+      animation: none !important;
+      transition: none !important;
+    }
 
     body {
       margin: 0;
@@ -76,6 +85,12 @@
       font-size: 42px;
       background: linear-gradient(135deg, #46a7ff, #0a64ad);
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.25);
+      animation: bootPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes bootPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
     }
 
     .progress {
@@ -104,7 +119,40 @@
         radial-gradient(circle at 16% 24%, rgba(105,178,255,.38), transparent 25%),
         radial-gradient(circle at 84% 18%, rgba(71,255,199,.18), transparent 24%),
         radial-gradient(circle at 72% 72%, rgba(255,255,255,.10), transparent 34%),
-        linear-gradient(135deg, #071b3a 0%, #083c78 55%, #0a7aa5 100%);
+        var(--wallpaper-base);
+      transition: background .5s ease;
+    }
+
+    .desktop-blob {
+      position: absolute;
+      z-index: 0;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(50px);
+      opacity: .55;
+    }
+
+    .blob-a {
+      width: 360px;
+      height: 360px;
+      left: -100px;
+      top: -80px;
+      background: radial-gradient(circle, rgba(105,178,255,.55), transparent 70%);
+      animation: blobFloat 17s ease-in-out infinite;
+    }
+
+    .blob-b {
+      width: 300px;
+      height: 300px;
+      right: -70px;
+      bottom: 30px;
+      background: radial-gradient(circle, rgba(71,255,199,.35), transparent 70%);
+      animation: blobFloat 21s ease-in-out infinite reverse;
+    }
+
+    @keyframes blobFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(28px, -24px) scale(1.08); }
     }
 
     .desktop::after {
@@ -140,14 +188,14 @@
       left: 18px;
       z-index: 2;
       display: grid;
-      grid-template-columns: repeat(2, 88px);
-      grid-auto-rows: 92px;
+      grid-template-columns: repeat(2, 92px);
+      grid-auto-rows: 106px;
       gap: 10px 12px;
     }
 
     .desktop-icon {
-      width: 88px;
-      height: 92px;
+      width: 92px;
+      height: 106px;
       border: 1px solid transparent;
       border-radius: 12px;
       display: flex;
@@ -157,30 +205,70 @@
       color: white;
       cursor: pointer;
       text-align: center;
-      text-shadow: 0 2px 8px rgba(0,0,0,.55);
+      background: transparent;
+      animation: iconIn .42s cubic-bezier(.2,.8,.3,1) both;
+      transition: background .16s ease, border-color .16s ease, transform .12s ease;
+    }
+
+    @keyframes iconIn {
+      from { opacity: 0; transform: translateY(16px) scale(.88); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .desktop-icon:hover {
       background: rgba(255,255,255,.14);
-      border-color: rgba(255,255,255,.2);
+      border-color: rgba(255,255,255,.22);
     }
 
     .desktop-icon:active {
-      transform: translateY(1px);
+      transform: translateY(1px) scale(.97);
+    }
+
+    .desktop-icon:focus-visible {
+      outline: 2px solid rgba(255,255,255,.65);
+      outline-offset: 2px;
+    }
+
+    .icon-emoji-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 6px 14px rgba(0,0,0,.28);
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    .desktop-icon:hover .icon-emoji-wrap {
+      background: rgba(255,255,255,.26);
+      transform: translateY(-2px);
     }
 
     .icon-emoji {
-      font-size: 35px;
+      font-size: 26px;
       line-height: 1;
-      filter: drop-shadow(0 5px 8px rgba(0,0,0,.34));
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,.4));
     }
 
     .icon-label {
       margin-top: 7px;
-      max-width: 82px;
-      font-size: 12px;
-      line-height: 1.1;
-      overflow-wrap: anywhere;
+      max-width: 90px;
+      padding: 3px 6px;
+      border-radius: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: .1px;
+      overflow-wrap: break-word;
+      word-break: keep-all;
+      hyphens: none;
+      color: #ffffff;
+      background: rgba(3, 14, 33, .55);
+      backdrop-filter: blur(3px);
+      box-shadow: 0 1px 4px rgba(0,0,0,.35);
+      text-shadow: 0 1px 1px rgba(0,0,0,.6);
     }
 
     #windowsLayer {
@@ -204,6 +292,7 @@
       background: var(--panel);
       color: var(--text);
       box-shadow: var(--shadow);
+      transition: box-shadow .2s ease;
     }
 
     .window.active {
@@ -227,11 +316,11 @@
       gap: 10px;
       color: white;
       cursor: move;
-      background: linear-gradient(180deg, #1578c9, #07539f);
+      background: linear-gradient(180deg, var(--blue), var(--blue-dark));
     }
 
     .window.active .titlebar {
-      background: linear-gradient(180deg, #1b8be9, #0759aa);
+      background: linear-gradient(180deg, var(--blue-light), var(--blue));
     }
 
     .titlebar-title {
@@ -292,7 +381,7 @@
       place-items: center;
       font-size: 42px;
       color: white;
-      background: linear-gradient(135deg, #0a64ad, #38bdf8);
+      background: linear-gradient(135deg, var(--blue), var(--blue-light));
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.28);
     }
 
@@ -564,6 +653,84 @@
       background: #d7ecff;
     }
 
+    .accent-row, .wallpaper-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .accent-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.4);
+      transition: transform .12s ease;
+    }
+
+    .accent-swatch.selected {
+      border-color: #101828;
+      transform: scale(1.1);
+    }
+
+    .wallpaper-swatch {
+      width: 64px;
+      height: 38px;
+      border-radius: 9px;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .wallpaper-swatch.selected {
+      border-color: var(--blue);
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+
+    .switch-row input {
+      width: 38px;
+      height: 20px;
+      accent-color: var(--blue);
+    }
+
+    .widgets-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .widget-card {
+      padding: 14px;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid #d7e2ee;
+      box-shadow: 0 10px 30px rgba(15,23,42,.06);
+    }
+
+    .widget-clock {
+      font-size: 26px;
+      font-weight: 900;
+      margin: 4px 0 0;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .signed-in-chip {
+      background: #e7f9ee;
+      color: #0a7a3d;
+      border-color: #bdeccb;
+    }
+
     .taskbar {
       position: absolute;
       left: 0;
@@ -595,6 +762,29 @@
       filter: brightness(1.08);
     }
 
+    .tb-icon-btn {
+      width: 34px;
+      height: 34px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.12);
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .tb-icon-btn:hover {
+      background: rgba(255,255,255,.24);
+    }
+
+    @keyframes taskIn {
+      from { opacity: 0; transform: translateY(6px) scale(.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     .task-buttons {
       flex: 1;
       display: flex;
@@ -618,6 +808,8 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      animation: taskIn .22s ease both;
+      transition: background .15s ease;
     }
 
     .task-btn.active {
@@ -637,9 +829,9 @@
       position: absolute;
       left: 8px;
       bottom: calc(var(--taskbar-h) + 8px);
-      width: 292px;
+      width: 320px;
+      max-width: calc(100vw - 16px);
       z-index: 5000;
-      display: none;
       overflow: hidden;
       border-radius: 18px;
       background: rgba(245,248,252,.94);
@@ -647,30 +839,104 @@
       border: 1px solid rgba(255,255,255,.45);
       box-shadow: 0 24px 70px rgba(0,0,0,.36);
       backdrop-filter: blur(18px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(14px) scale(.97);
+      transform-origin: bottom left;
+      transition: opacity .18s ease, transform .2s cubic-bezier(.2,.9,.25,1), visibility 0s linear .2s;
     }
 
     .start-menu.open {
-      display: block;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      transition: opacity .18s ease, transform .2s cubic-bezier(.2,.9,.25,1), visibility 0s;
     }
 
-    .menu-header {
-      padding: 16px;
-      color: white;
-      background: linear-gradient(135deg, #0a64ad, #36a3ff);
+    .menu-search {
+      padding: 14px 14px 8px;
     }
 
-    .menu-header strong {
-      display: block;
-      font-size: 17px;
+    .menu-search input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid #ccd8e5;
+      outline: none;
+      font-size: 13px;
+      background: white;
+      color: var(--text);
     }
 
-    .menu-header span {
-      font-size: 12px;
-      opacity: .88;
+    .menu-search input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(10,100,173,.12);
     }
 
-    .menu-items {
-      padding: 8px;
+    .menu-body {
+      padding: 2px 14px 6px;
+      max-height: min(430px, 56vh);
+      overflow-y: auto;
+    }
+
+    .menu-section-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 10px 2px 6px;
+    }
+
+    .menu-pinned {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+
+    .menu-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 4px;
+      border: 0;
+      border-radius: 12px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .menu-tile:hover {
+      background: #e8f2ff;
+    }
+
+    .menu-tile-icon {
+      font-size: 20px;
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #eef4fb;
+    }
+
+    .menu-tile-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      max-width: 68px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .menu-system {
+      display: grid;
+      gap: 4px;
+      padding-bottom: 4px;
     }
 
     .menu-item {
@@ -693,10 +959,87 @@
       background: #e8f2ff;
     }
 
-    .menu-footer {
-      padding: 10px 14px 14px;
+    .menu-empty {
+      padding: 14px 4px;
       color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .menu-footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      border-top: 1px solid rgba(15,23,42,.08);
+      background: rgba(255,255,255,.55);
+    }
+
+    .menu-account {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 10px;
+      text-align: left;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .menu-account:hover {
+      background: #e8f2ff;
+    }
+
+    .menu-account-avatar {
+      width: 32px;
+      height: 32px;
+      flex: none;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
       font-size: 12px;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    }
+
+    .menu-account-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    .menu-account-text strong {
+      font-size: 12.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-account-text span {
+      font-size: 10.5px;
+      color: var(--muted);
+    }
+
+    .menu-power {
+      width: 34px;
+      height: 34px;
+      flex: none;
+      border-radius: 10px;
+      border: 1px solid rgba(15,23,42,.12);
+      background: white;
+      cursor: pointer;
+      font-size: 15px;
+      color: #b42318;
+    }
+
+    .menu-power:hover {
+      background: #fee4e2;
     }
 
     @media (max-width: 760px) {
@@ -731,6 +1074,14 @@
       .task-btn {
         min-width: 92px;
       }
+
+      .start-menu {
+        width: calc(100vw - 16px);
+      }
+
+      .widgets-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -739,30 +1090,45 @@
     <div class="boot-card">
       <div class="boot-logo">🪟</div>
       <h1>Winfolio OS</h1>
-      <p class="muted" style="color:rgba(255,255,255,.7)">Booting your portfolio desktop...</p>
+      <p class="muted" id="bootSubtitle" style="color:rgba(255,255,255,.7)">Booting your portfolio desktop...</p>
       <div class="progress"><span id="bootBar"></span></div>
     </div>
   </div>
 
   <main class="desktop" id="desktop">
+    <div class="desktop-blob blob-a"></div>
+    <div class="desktop-blob blob-b"></div>
     <div class="desktop-icons" id="desktopIcons"></div>
     <div id="windowsLayer"></div>
 
     <div class="desktop-hint">Click an icon to open an app</div>
 
     <section class="start-menu" id="startMenu">
-      <div class="menu-header">
-        <strong id="menuName">Portfolio</strong>
-        <span>Start menu</span>
+      <div class="menu-search">
+        <input type="text" id="menuSearch" placeholder="Search apps..." autocomplete="off" />
       </div>
-      <div class="menu-items" id="menuItems"></div>
-      <div class="menu-footer">
-        Windows-inspired portfolio UI. Replace content in the PROFILE object.
+      <div class="menu-body">
+        <div class="menu-section-label">Pinned</div>
+        <div class="menu-pinned" id="menuPinned"></div>
+        <div class="menu-section-label">System</div>
+        <div class="menu-system" id="menuSystem"></div>
+      </div>
+      <div class="menu-footer-bar">
+        <button class="menu-account" id="menuAccountBtn">
+          <span class="menu-account-avatar" id="menuAccountAvatar">BR</span>
+          <span class="menu-account-text">
+            <strong id="menuName">Portfolio</strong>
+            <span>View account</span>
+          </span>
+        </button>
+        <button class="menu-power" id="menuPowerBtn" title="Power">⏻</button>
       </div>
     </section>
 
     <footer class="taskbar">
-      <button class="start-btn" id="startBtn">Start</button>
+      <button class="start-btn" id="startBtn">⊞ Start</button>
+      <button class="tb-icon-btn" id="searchBtn" title="Search">🔍</button>
+      <button class="tb-icon-btn" id="widgetsBtn" title="Widgets">🧩</button>
       <div class="task-buttons" id="taskButtons"></div>
       <div class="tray" id="clock"></div>
     </footer>
@@ -1045,15 +1411,259 @@
           </div>
         `,
         afterOpen: win => mountGame(win)
+      },
+
+      settings: {
+        title: "Settings",
+        icon: "⚙️",
+        width: "560px",
+        height: "560px",
+        render: () => `
+          <h2>Settings</h2>
+          <p class="muted">Personalize your desktop. Changes apply instantly and are saved in this browser.</p>
+
+          <div class="card" style="margin-top:14px">
+            <h3>Accent color</h3>
+            <div class="accent-row" id="accentRow"></div>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <h3>Wallpaper</h3>
+            <div class="wallpaper-row" id="wallpaperRow"></div>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <h3>Motion</h3>
+            <label class="switch-row">
+              <span>Animations</span>
+              <input type="checkbox" id="motionToggle" />
+            </label>
+            <p class="muted" style="margin-top:6px;font-size:12px">Turn off window, icon, and menu animations.</p>
+          </div>
+
+          <div class="card" style="margin-top:14px">
+            <h3>About this PC</h3>
+            <p class="muted">Winfolio OS · Build 26.08 · Signed in as ${PROFILE.name}</p>
+          </div>
+        `,
+        afterOpen: win => mountSettings(win)
+      },
+
+      widgets: {
+        title: "Widgets",
+        icon: "🧩",
+        width: "560px",
+        height: "480px",
+        render: () => `
+          <h2>Widgets</h2>
+          <p class="muted">A quick glance at the day.</p>
+          <div class="widgets-grid">
+            <div class="widget-card">
+              <h3>🕒 Clock</h3>
+              <p class="widget-clock" id="widgetClock">--:--</p>
+              <p class="muted" id="widgetDate"></p>
+            </div>
+            <div class="widget-card">
+              <h3>💬 Quote</h3>
+              <p id="widgetQuote">Build something small, ship it, then iterate.</p>
+              <button class="btn secondary" id="widgetQuoteBtn" style="margin-top:8px">New quote</button>
+            </div>
+            <div class="widget-card">
+              <h3>💻 GitHub</h3>
+              <div class="chips">
+                <span class="chip">Repos 24</span>
+                <span class="chip">Stars 38</span>
+                <span class="chip">Followers 12</span>
+              </div>
+              <a class="btn secondary" style="margin-top:10px" href="${PROFILE.links.github}" target="_blank" rel="noreferrer">View profile</a>
+            </div>
+            <div class="widget-card">
+              <h3>📝 Quick note</h3>
+              <p class="muted">Jump back into your notes.</p>
+              <button class="btn secondary" id="widgetNotesBtn" style="margin-top:8px">Open Notes</button>
+            </div>
+          </div>
+        `,
+        afterOpen: win => mountWidgets(win)
+      },
+
+      account: {
+        title: "Account",
+        icon: "🪪",
+        width: "640px",
+        height: "440px",
+        render: () => `
+          <div class="hero">
+            <div>
+              <h1>${PROFILE.name}</h1>
+              <p class="muted"><strong>${PROFILE.role}</strong> · ${PROFILE.location}</p>
+              <div class="btn-row">
+                <span class="chip signed-in-chip">● Signed in</span>
+              </div>
+            </div>
+            <div class="avatar">${initials(PROFILE.name)}</div>
+          </div>
+
+          <div class="grid two" style="margin-top:18px">
+            <div class="card">
+              <h3>Contact</h3>
+              <ul class="contact-list">
+                <li>📧 <a href="mailto:${PROFILE.email}">${PROFILE.email}</a></li>
+                <li>💼 <a href="${PROFILE.links.linkedin}" target="_blank" rel="noreferrer">LinkedIn</a></li>
+                <li>💻 <a href="${PROFILE.links.github}" target="_blank" rel="noreferrer">GitHub</a></li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Account</h3>
+              <p class="muted">Local demo account for this portfolio desktop.</p>
+              <button class="btn secondary" id="signOutBtn" style="margin-top:8px">Sign out</button>
+            </div>
+          </div>
+        `,
+        afterOpen: win => {
+          if (win.dataset.accountMounted) return;
+          win.dataset.accountMounted = "true";
+
+          const btn = win.querySelector("#signOutBtn");
+          btn.addEventListener("click", () => {
+            btn.textContent = "Signed out ✓";
+            btn.disabled = true;
+            setTimeout(() => closeWindow("account"), 700);
+          });
+        }
       }
     };
+
+    const ACCENTS = [
+      { name: "ocean", blue: "#0a64ad", dark: "#063b78", light: "#1b8be9" },
+      { name: "violet", blue: "#7c3aed", dark: "#4c1d95", light: "#a78bfa" },
+      { name: "rose", blue: "#e11d48", dark: "#881337", light: "#fb7185" },
+      { name: "emerald", blue: "#059669", dark: "#065f46", light: "#34d399" },
+      { name: "amber", blue: "#d97706", dark: "#92400e", light: "#fbbf24" }
+    ];
+
+    const WALLPAPERS = [
+      { name: "harbor", css: "linear-gradient(135deg, #071b3a 0%, #083c78 55%, #0a7aa5 100%)" },
+      { name: "dusk", css: "linear-gradient(135deg, #1c0a3a 0%, #4a1478 55%, #a5327a 100%)" },
+      { name: "forest", css: "linear-gradient(135deg, #04231b 0%, #0a5c3f 55%, #17a06f 100%)" },
+      { name: "sand", css: "linear-gradient(135deg, #241704 0%, #7a4a0a 55%, #d69328 100%)" }
+    ];
+
+    const systemAppIds = ["settings", "widgets", "account"];
+
+    function initials(name) {
+      return name.split(" ").map(word => word[0]).slice(0, 2).join("").toUpperCase();
+    }
+
+    function setAccent(accent) {
+      document.documentElement.style.setProperty("--blue", accent.blue);
+      document.documentElement.style.setProperty("--blue-dark", accent.dark);
+      document.documentElement.style.setProperty("--blue-light", accent.light);
+      localStorage.setItem("winfolio-accent", accent.name);
+      document.querySelectorAll(".accent-swatch").forEach(swatch => {
+        swatch.classList.toggle("selected", swatch.dataset.name === accent.name);
+      });
+    }
+
+    function setWallpaper(wallpaper) {
+      document.documentElement.style.setProperty("--wallpaper-base", wallpaper.css);
+      localStorage.setItem("winfolio-wallpaper", wallpaper.name);
+      document.querySelectorAll(".wallpaper-swatch").forEach(swatch => {
+        swatch.classList.toggle("selected", swatch.dataset.name === wallpaper.name);
+      });
+    }
+
+    function setMotion(enabled) {
+      document.body.classList.toggle("reduce-motion", !enabled);
+      localStorage.setItem("winfolio-motion", enabled ? "on" : "off");
+      const toggle = document.getElementById("motionToggle");
+      if (toggle) toggle.checked = enabled;
+    }
+
+    function mountSettings(win) {
+      if (win.dataset.settingsMounted) return;
+      win.dataset.settingsMounted = "true";
+
+      const currentAccentName = localStorage.getItem("winfolio-accent") || ACCENTS[0].name;
+      const currentWallpaperName = localStorage.getItem("winfolio-wallpaper") || WALLPAPERS[0].name;
+
+      const accentRow = win.querySelector("#accentRow");
+      accentRow.innerHTML = ACCENTS.map(accent => `
+        <button class="accent-swatch${accent.name === currentAccentName ? " selected" : ""}"
+          data-name="${accent.name}" style="background:${accent.blue}" title="${accent.name}"></button>
+      `).join("");
+      accentRow.querySelectorAll(".accent-swatch").forEach(swatch => {
+        swatch.addEventListener("click", () => {
+          const accent = ACCENTS.find(a => a.name === swatch.dataset.name);
+          if (accent) setAccent(accent);
+        });
+      });
+
+      const wallpaperRow = win.querySelector("#wallpaperRow");
+      wallpaperRow.innerHTML = WALLPAPERS.map(wallpaper => `
+        <button class="wallpaper-swatch${wallpaper.name === currentWallpaperName ? " selected" : ""}"
+          data-name="${wallpaper.name}" style="background:${wallpaper.css}" title="${wallpaper.name}"></button>
+      `).join("");
+      wallpaperRow.querySelectorAll(".wallpaper-swatch").forEach(swatch => {
+        swatch.addEventListener("click", () => {
+          const wallpaper = WALLPAPERS.find(w => w.name === swatch.dataset.name);
+          if (wallpaper) setWallpaper(wallpaper);
+        });
+      });
+
+      const motionToggle = win.querySelector("#motionToggle");
+      motionToggle.checked = !document.body.classList.contains("reduce-motion");
+      motionToggle.addEventListener("change", () => setMotion(motionToggle.checked));
+    }
+
+    function mountWidgets(win) {
+      if (win.dataset.widgetsMounted) return;
+      win.dataset.widgetsMounted = "true";
+
+      const clockEl = win.querySelector("#widgetClock");
+      const dateEl = win.querySelector("#widgetDate");
+
+      const tick = () => {
+        if (!win.isConnected) {
+          clearInterval(timer);
+          return;
+        }
+
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        dateEl.textContent = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+      };
+
+      const timer = setInterval(tick, 1000);
+      tick();
+
+      const quotes = [
+        "Build something small, ship it, then iterate.",
+        "Clean code is a habit, not an event.",
+        "Every bug fixed is a lesson learned.",
+        "Consistency beats intensity over time.",
+        "Good UX is invisible until it's missing.",
+        "Done is better than perfect. Then improve."
+      ];
+
+      const quoteEl = win.querySelector("#widgetQuote");
+      win.querySelector("#widgetQuoteBtn").addEventListener("click", () => {
+        quoteEl.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+      });
+
+      win.querySelector("#widgetNotesBtn").addEventListener("click", () => {
+        openApp("notes", win.querySelector("#widgetNotesBtn"));
+      });
+    }
 
     const desktopIcons = document.getElementById("desktopIcons");
     const windowsLayer = document.getElementById("windowsLayer");
     const taskButtons = document.getElementById("taskButtons");
     const startBtn = document.getElementById("startBtn");
+    const searchBtn = document.getElementById("searchBtn");
+    const widgetsBtn = document.getElementById("widgetsBtn");
     const startMenu = document.getElementById("startMenu");
-    const menuItems = document.getElementById("menuItems");
+    const menuSearch = document.getElementById("menuSearch");
     const clock = document.getElementById("clock");
 
     const openWindows = new Map();
@@ -1063,25 +1673,58 @@
     let activeAppId = null;
 
     function renderDesktopIcons() {
-      desktopIcons.innerHTML = desktopAppIds.map(id => {
+      desktopIcons.innerHTML = desktopAppIds.map((id, index) => {
         const app = APP_DEFS[id];
         return `
-          <button class="desktop-icon" data-open="${id}" title="Open ${app.title}">
-            <span class="icon-emoji">${app.icon}</span>
+          <button class="desktop-icon" data-open="${id}" title="Open ${app.title}" style="animation-delay:${index * 55}ms">
+            <span class="icon-emoji-wrap"><span class="icon-emoji">${app.icon}</span></span>
             <span class="icon-label">${app.title}</span>
           </button>
         `;
       }).join("");
 
       desktopIcons.querySelectorAll("[data-open]").forEach(icon => {
-        icon.addEventListener("click", () => openApp(icon.dataset.open));
+        icon.addEventListener("click", () => {
+          if (!document.body.classList.contains("reduce-motion")) {
+            icon.animate(
+              [
+                { transform: "scale(1)" },
+                { transform: "scale(.9)" },
+                { transform: "scale(1.05)" },
+                { transform: "scale(1)" }
+              ],
+              { duration: 260, easing: "ease-out" }
+            );
+          }
+          openApp(icon.dataset.open, icon);
+        });
       });
     }
 
     function renderStartMenu() {
       document.getElementById("menuName").textContent = PROFILE.name;
+      document.getElementById("menuAccountAvatar").textContent = initials(PROFILE.name);
 
-      menuItems.innerHTML = desktopAppIds.map(id => {
+      const menuPinned = document.getElementById("menuPinned");
+      menuPinned.innerHTML = desktopAppIds.map(id => {
+        const app = APP_DEFS[id];
+        return `
+          <button class="menu-tile" data-open="${id}" data-name="${app.title.toLowerCase()}">
+            <span class="menu-tile-icon">${app.icon}</span>
+            <span class="menu-tile-label">${app.title}</span>
+          </button>
+        `;
+      }).join("");
+
+      menuPinned.querySelectorAll("[data-open]").forEach(tile => {
+        tile.addEventListener("click", () => {
+          openApp(tile.dataset.open, tile);
+          startMenu.classList.remove("open");
+        });
+      });
+
+      const menuSystem = document.getElementById("menuSystem");
+      menuSystem.innerHTML = systemAppIds.map(id => {
         const app = APP_DEFS[id];
         return `
           <button class="menu-item" data-open="${id}">
@@ -1091,20 +1734,126 @@
         `;
       }).join("");
 
-      menuItems.querySelectorAll("[data-open]").forEach(item => {
+      menuSystem.querySelectorAll("[data-open]").forEach(item => {
         item.addEventListener("click", () => {
-          openApp(item.dataset.open);
+          openApp(item.dataset.open, item);
           startMenu.classList.remove("open");
         });
       });
+
+      menuSearch.addEventListener("input", () => {
+        const query = menuSearch.value.trim().toLowerCase();
+        let visibleCount = 0;
+
+        menuPinned.querySelectorAll(".menu-tile").forEach(tile => {
+          const match = tile.dataset.name.includes(query);
+          tile.style.display = match ? "" : "none";
+          if (match) visibleCount += 1;
+        });
+
+        let empty = menuPinned.parentElement.querySelector(".menu-empty");
+        if (query && visibleCount === 0) {
+          if (!empty) {
+            empty = document.createElement("div");
+            empty.className = "menu-empty";
+            empty.textContent = "No apps found.";
+            menuPinned.insertAdjacentElement("afterend", empty);
+          }
+        } else if (empty) {
+          empty.remove();
+        }
+      });
+
+      menuSearch.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+        const visibleTile = Array.from(menuPinned.querySelectorAll(".menu-tile"))
+          .find(tile => tile.style.display !== "none");
+        if (visibleTile) visibleTile.click();
+      });
+
+      document.getElementById("menuAccountBtn").addEventListener("click", () => {
+        openApp("account", document.getElementById("menuAccountBtn"));
+        startMenu.classList.remove("open");
+      });
+
+      document.getElementById("menuPowerBtn").addEventListener("click", () => {
+        startMenu.classList.remove("open");
+        shutdown();
+      });
     }
 
-    function openApp(appId) {
+    function animateWindowOpen(win, triggerEl) {
+      if (document.body.classList.contains("reduce-motion")) return;
+
+      const targetRect = win.getBoundingClientRect();
+      const originRect = triggerEl
+        ? triggerEl.getBoundingClientRect()
+        : { left: targetRect.left + targetRect.width / 2 - 10, top: targetRect.top + targetRect.height / 2 - 10, width: 20, height: 20 };
+
+      const dx = (originRect.left + originRect.width / 2) - (targetRect.left + targetRect.width / 2);
+      const dy = (originRect.top + originRect.height / 2) - (targetRect.top + targetRect.height / 2);
+      const scale = Math.max(0.08, Math.min(originRect.width / targetRect.width, 0.3));
+
+      win.style.transformOrigin = "center center";
+      win.style.transition = "none";
+      win.style.opacity = "0";
+      win.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+      win.style.filter = "blur(2px)";
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          win.style.transition = "transform .32s cubic-bezier(.2,.9,.25,1), opacity .24s ease, filter .28s ease";
+          win.style.opacity = "1";
+          win.style.transform = "translate(0, 0) scale(1)";
+          win.style.filter = "none";
+        });
+      });
+
+      const cleanup = event => {
+        if (event.propertyName !== "transform") return;
+        win.style.transition = "";
+        win.style.transform = "";
+        win.style.filter = "";
+        win.removeEventListener("transitionend", cleanup);
+      };
+
+      win.addEventListener("transitionend", cleanup);
+    }
+
+    function animateWindowClose(win, callback) {
+      if (document.body.classList.contains("reduce-motion")) {
+        callback();
+        return;
+      }
+
+      win.style.transformOrigin = "center center";
+      win.style.transition = "transform .18s ease, opacity .18s ease";
+      win.style.transform = "scale(.9)";
+      win.style.opacity = "0";
+      setTimeout(callback, 180);
+    }
+
+    function pulseWindow(win) {
+      if (document.body.classList.contains("reduce-motion")) return;
+      win.animate(
+        [{ transform: "translateY(0)" }, { transform: "translateY(-4px)" }, { transform: "translateY(0)" }],
+        { duration: 220, easing: "ease-out" }
+      );
+    }
+
+    function openApp(appId, triggerEl) {
       const existing = openWindows.get(appId);
 
       if (existing) {
+        const wasMinimized = existing.classList.contains("minimized");
         existing.classList.remove("minimized");
         focusWindow(existing);
+
+        if (wasMinimized) {
+          animateWindowOpen(existing, taskButtonMap.get(appId) || triggerEl);
+        } else {
+          pulseWindow(existing);
+        }
         return;
       }
 
@@ -1141,6 +1890,7 @@
       makeDraggable(win, win.querySelector(".titlebar"));
       createTaskButton(appId);
       focusWindow(win);
+      animateWindowOpen(win, triggerEl);
 
       if (app.afterOpen) app.afterOpen(win);
     }
@@ -1180,6 +1930,7 @@
         if (win.classList.contains("minimized")) {
           win.classList.remove("minimized");
           focusWindow(win);
+          animateWindowOpen(win, btn);
           return;
         }
 
@@ -1187,6 +1938,7 @@
           minimizeWindow(appId);
         } else {
           focusWindow(win);
+          pulseWindow(win);
         }
       });
 
@@ -1212,7 +1964,7 @@
       const win = openWindows.get(appId);
       const btn = taskButtonMap.get(appId);
 
-      if (win) win.remove();
+      if (win) animateWindowClose(win, () => win.remove());
       if (btn) btn.remove();
 
       openWindows.delete(appId);
@@ -1225,13 +1977,33 @@
       const win = openWindows.get(appId);
       if (!win) return;
 
-      win.classList.add("minimized");
-      win.classList.remove("active");
-
       const btn = taskButtonMap.get(appId);
-      if (btn) btn.classList.remove("active");
 
+      win.classList.remove("active");
+      if (btn) btn.classList.remove("active");
       if (activeAppId === appId) activeAppId = null;
+
+      if (document.body.classList.contains("reduce-motion")) {
+        win.classList.add("minimized");
+        return;
+      }
+
+      const winRect = win.getBoundingClientRect();
+      const btnRect = btn ? btn.getBoundingClientRect() : { left: 20, top: window.innerHeight - 10, width: 20, height: 20 };
+      const dx = (btnRect.left + btnRect.width / 2) - (winRect.left + winRect.width / 2);
+      const dy = (btnRect.top + btnRect.height / 2) - (winRect.top + winRect.height / 2);
+
+      win.style.transformOrigin = "center center";
+      win.style.transition = "transform .26s cubic-bezier(.4,0,.6,1), opacity .22s ease";
+      win.style.transform = `translate(${dx}px, ${dy}px) scale(.06)`;
+      win.style.opacity = "0";
+
+      setTimeout(() => {
+        win.classList.add("minimized");
+        win.style.transition = "";
+        win.style.transform = "";
+        win.style.opacity = "";
+      }, 260);
     }
 
     function toggleMaximize(win) {
@@ -1540,21 +2312,43 @@ Portfolio: <a href="${PROFILE.links.portfolio}" target="_blank">${PROFILE.links.
       });
     }
 
+    const BOOT_MESSAGES = [
+      "Booting your portfolio desktop...",
+      "Loading apps...",
+      "Preparing windows...",
+      "Almost there..."
+    ];
+
     function boot() {
       const bootScreen = document.getElementById("bootScreen");
       const bootBar = document.getElementById("bootBar");
+      const bootSubtitle = document.getElementById("bootSubtitle");
       let progress = 0;
+      let messageIndex = 0;
+
+      bootScreen.style.display = "grid";
+      bootScreen.style.opacity = "1";
+      bootBar.style.transition = "width .18s ease";
+      bootBar.style.width = "0%";
+
+      const messageTimer = setInterval(() => {
+        messageIndex = (messageIndex + 1) % BOOT_MESSAGES.length;
+        bootSubtitle.textContent = BOOT_MESSAGES[messageIndex];
+      }, 500);
 
       const timer = setInterval(() => {
         progress += Math.random() * 18 + 7;
         if (progress >= 100) {
           progress = 100;
           clearInterval(timer);
+          clearInterval(messageTimer);
 
           setTimeout(() => {
+            bootScreen.style.transition = "opacity .55s ease";
             bootScreen.style.opacity = "0";
             setTimeout(() => {
               bootScreen.style.display = "none";
+              bootSubtitle.textContent = BOOT_MESSAGES[0];
             }, 560);
           }, 280);
         }
@@ -1563,13 +2357,68 @@ Portfolio: <a href="${PROFILE.links.portfolio}" target="_blank">${PROFILE.links.
       }, 150);
     }
 
+    function shutdown() {
+      Array.from(openWindows.keys()).forEach(id => closeWindow(id));
+
+      const bootScreen = document.getElementById("bootScreen");
+      const bootBar = document.getElementById("bootBar");
+      const bootSubtitle = document.getElementById("bootSubtitle");
+
+      bootSubtitle.textContent = "Shutting down...";
+      bootScreen.style.transition = "none";
+      bootScreen.style.display = "grid";
+      bootScreen.style.opacity = "0";
+      bootBar.style.transition = "width .5s ease";
+      bootBar.style.width = "0%";
+
+      requestAnimationFrame(() => {
+        bootScreen.style.transition = "opacity .4s ease";
+        bootScreen.style.opacity = "1";
+      });
+
+      setTimeout(() => {
+        bootSubtitle.textContent = "Booting your portfolio desktop...";
+        boot();
+      }, 1300);
+    }
+
+    function loadSavedPreferences() {
+      const accentName = localStorage.getItem("winfolio-accent");
+      const wallpaperName = localStorage.getItem("winfolio-wallpaper");
+      const motion = localStorage.getItem("winfolio-motion");
+
+      const accent = ACCENTS.find(a => a.name === accentName) || ACCENTS[0];
+      const wallpaper = WALLPAPERS.find(w => w.name === wallpaperName) || WALLPAPERS[0];
+
+      document.documentElement.style.setProperty("--blue", accent.blue);
+      document.documentElement.style.setProperty("--blue-dark", accent.dark);
+      document.documentElement.style.setProperty("--blue-light", accent.light);
+      document.documentElement.style.setProperty("--wallpaper-base", wallpaper.css);
+
+      if (motion === "off") {
+        document.body.classList.add("reduce-motion");
+      }
+    }
+
     startBtn.addEventListener("click", event => {
       event.stopPropagation();
+      const willOpen = !startMenu.classList.contains("open");
       startMenu.classList.toggle("open");
+      if (willOpen) setTimeout(() => menuSearch.focus(), 160);
+    });
+
+    searchBtn.addEventListener("click", event => {
+      event.stopPropagation();
+      startMenu.classList.add("open");
+      setTimeout(() => menuSearch.focus(), 160);
+    });
+
+    widgetsBtn.addEventListener("click", () => {
+      openApp("widgets", widgetsBtn);
     });
 
     document.addEventListener("click", event => {
-      if (!startMenu.contains(event.target) && event.target !== startBtn) {
+      if (!startMenu.contains(event.target) && event.target !== startBtn && event.target !== searchBtn) {
         startMenu.classList.remove("open");
       }
     });
@@ -1580,6 +2429,7 @@ Portfolio: <a href="${PROFILE.links.portfolio}" target="_blank">${PROFILE.links.
       }
     });
 
+    loadSavedPreferences();
     renderDesktopIcons();
     renderStartMenu();
     updateClock();
