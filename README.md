@@ -2,7 +2,7 @@
 
 # 🖥️ AXIOM OS
 
-### An interactive, desktop-style developer portfolio — in a single HTML file
+### An interactive, desktop-style developer portfolio
 
 *A lock screen. A login. A boot sequence. A fully click-around desktop.*
 *Not a website that describes a developer — a website that behaves like an OS.*
@@ -22,8 +22,6 @@
 **Axiom OS** is a self-contained, single-page portfolio built to look and *feel* like a real operating system — lock screen, sign-in animation, boot sequence, desktop icons, a taskbar, a start menu, widgets, a command palette, and a window manager that lets you drag, resize, minimize, maximize, and snap real "apps."
 
 Every "app" is a window into the same portfolio content — About, Skills, Projects, Experience, Blue Team casework, Résumé, Contact — plus a couple of just-for-fun extras (a working **Terminal** and **Minesweeper**) that make the whole thing feel alive instead of static.
-
-> 🎯 Built for **Bilal Rauf** — Full-Stack Developer & Blue Team security practitioner — but the shell itself is fully data-driven, so it can be re-skinned for anyone.
 
 ---
 
@@ -174,6 +172,6 @@ Wallpapers and accent colors are defined the same way, in `WALLS` and `ACCENTS` 
 
 <div align="center">
 
-*If Axiom OS boots up cleanly for you, consider dropping a ⭐ on the repo.*
+*If Axiom OS boots up cleanly for you, consider dropping a ⭐ on the repo! :)*
 
 </div>
