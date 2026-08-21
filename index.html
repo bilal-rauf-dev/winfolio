@@ -1618,6 +1618,535 @@ textarea.field { min-height: 108px; resize: vertical; line-height: 1.6; }
     transition-duration: .001ms !important;
   }
 }
+
+/* ============================================================
+   POMODORO TIMER
+   ============================================================ */
+.timer-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 24px;
+  background: var(--bg2);
+}
+
+.timer-modes {
+  display: flex;
+  gap: 5px;
+  padding: 4px;
+  border-radius: var(--r3);
+  background: var(--bg1);
+  border: 1px solid var(--line);
+}
+
+.timer-mode {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: var(--r2);
+  background: transparent;
+  color: var(--tx2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background .16s, color .16s;
+}
+
+.timer-mode.on { background: var(--accent); color: var(--accent-ink); }
+
+.timer-ring-wrap {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.timer-ring-wrap svg { transform: rotate(-90deg); }
+
+.timer-ring-bg { fill: none; stroke: var(--bg4); stroke-width: 8; }
+.timer-ring-fg {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 565;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset .8s var(--ease-out), stroke .4s;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 60%, transparent));
+}
+
+.timer-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.timer-time {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 42px;
+  font-weight: 300;
+  letter-spacing: -.03em;
+  color: var(--tx0);
+  line-height: 1;
+}
+
+.timer-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--tx2);
+}
+
+.timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timer-btn {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line2);
+  border-radius: 50%;
+  background: var(--bg1);
+  color: var(--tx1);
+  cursor: pointer;
+  transition: background .16s, color .16s, border-color .16s, transform .14s var(--ease);
+}
+
+.timer-btn:hover { background: var(--bg3); color: var(--tx0); border-color: var(--line2); }
+.timer-btn:active { transform: scale(.92); }
+.timer-btn.primary { width: 58px; height: 58px; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.timer-btn.primary:hover { filter: brightness(1.12); }
+
+.timer-sessions {
+  display: flex;
+  gap: 6px;
+}
+
+.timer-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bg4);
+  border: 1px solid var(--line2);
+  transition: background .3s, border-color .3s;
+}
+
+.timer-dot.done { background: var(--accent); border-color: var(--accent); }
+
+/* ============================================================
+   ACTIVITY MONITOR / SYSMON
+   ============================================================ */
+.sysmon {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg0);
+  font-family: var(--f-mono);
+}
+
+.sysmon-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg1);
+  padding: 0 14px;
+}
+
+.sysmon-tab {
+  padding: 11px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--tx2);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .16s, border-color .16s;
+  margin-bottom: -1px;
+}
+
+.sysmon-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.sysmon-tab:hover:not(.on) { color: var(--tx0); }
+
+.sysmon-pane { flex: 1; overflow: auto; padding: 16px; display: none; }
+.sysmon-pane.on { display: block; }
+
+.sysmon-graph-wrap {
+  border-radius: var(--r2);
+  border: 1px solid var(--line);
+  background: var(--bg1);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.sysmon-graph-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sysmon-graph-head b { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--tx2); }
+.sysmon-graph-head span { font-size: 13px; color: var(--tx0); }
+
+.sysmon-canvas-wrap {
+  position: relative;
+  height: 80px;
+  padding: 10px;
+}
+
+.sysmon-canvas-wrap canvas { width: 100%; height: 100%; }
+
+.sysmon-proc-head {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 80px;
+  gap: 10px;
+  padding: 7px 12px;
+  font-size: 9.5px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  border-bottom: 1px solid var(--line);
+}
+
+.sysmon-proc-row {
+  display: grid;
+  grid-template-columns: 1fr 80px 80px 80px;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  transition: background .12s;
+  cursor: default;
+}
+
+.sysmon-proc-row:hover { background: var(--bg2); }
+.sysmon-proc-row:last-child { border-bottom: 0; }
+.sysmon-proc-row .name { font-size: 12px; color: var(--tx0); }
+.sysmon-proc-row .pid { font-size: 11px; color: var(--tx2); }
+.sysmon-proc-row .cpu-val { font-size: 11.5px; color: var(--ok); text-align: right; }
+.sysmon-proc-row .mem-val { font-size: 11.5px; color: var(--accent); text-align: right; }
+.sysmon-proc-row .stat { font-size: 11px; color: var(--tx2); text-align: right; }
+
+.sysmon-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.sysmon-stat {
+  border-radius: var(--r2);
+  border: 1px solid var(--line);
+  background: var(--bg1);
+  padding: 12px 14px;
+}
+
+.sysmon-stat small { font-size: 9.5px; letter-spacing: .15em; text-transform: uppercase; color: var(--tx2); display: block; }
+.sysmon-stat b { font-size: 22px; font-weight: 300; color: var(--tx0); display: block; margin-top: 4px; }
+.sysmon-stat .bar { height: 3px; border-radius: 3px; background: var(--bg4); margin-top: 8px; overflow: hidden; }
+.sysmon-stat .bar i { display: block; height: 100%; background: var(--accent); border-radius: inherit; transition: width 1.2s var(--ease-out); }
+
+/* ============================================================
+   MUSIC / AMBIENT PLAYER
+   ============================================================ */
+.music-wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg2);
+}
+
+.music-head {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.music-now {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.music-art {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--r3);
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  background: linear-gradient(150deg, var(--bg4), var(--bg3));
+  border: 1px solid var(--line2);
+  flex: 0 0 auto;
+}
+
+.music-info { flex: 1; min-width: 0; }
+.music-title { font-family: var(--f-display); font-size: 16px; font-weight: 600; color: var(--tx0); }
+.music-sub { font-size: 12px; color: var(--tx2); margin-top: 3px; }
+
+.music-vis {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 28px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.music-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: height .15s var(--ease-out);
+  opacity: .8;
+}
+
+.music-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.music-ctrl-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r2);
+  background: transparent;
+  color: var(--tx2);
+  cursor: pointer;
+  transition: background .14s, color .14s, transform .12s;
+}
+
+.music-ctrl-btn:hover { background: var(--bg3); color: var(--tx0); }
+.music-ctrl-btn:active { transform: scale(.9); }
+.music-ctrl-btn.on { color: var(--accent); }
+
+.music-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: filter .14s, transform .12s;
+  margin: 0 4px;
+}
+
+.music-play-btn:hover { filter: brightness(1.14); }
+.music-play-btn:active { transform: scale(.93); }
+
+.music-vol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  color: var(--tx2);
+}
+
+.music-vol input[type=range] {
+  width: 80px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.music-scenes {
+  flex: 1;
+  padding: 16px 22px;
+  overflow: auto;
+}
+
+.music-scenes-label {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  margin-bottom: 12px;
+}
+
+.music-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.music-scene {
+  padding: 14px 16px;
+  border-radius: var(--r3);
+  border: 1px solid var(--line);
+  background: var(--bg1);
+  cursor: pointer;
+  text-align: left;
+  transition: background .16s, border-color .16s, transform .14s var(--ease);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.music-scene:hover { background: var(--bg3); border-color: var(--line2); }
+.music-scene:active { transform: scale(.98); }
+.music-scene.on { background: color-mix(in srgb, var(--accent) 14%, var(--bg1)); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+
+.music-scene-icon { font-size: 22px; flex: 0 0 auto; }
+.music-scene-name { font-size: 13px; font-weight: 600; color: var(--tx0); display: block; }
+.music-scene-desc { font-size: 11px; color: var(--tx2); display: block; margin-top: 2px; }
+
+/* ============================================================
+   GITHUB STATS
+   ============================================================ */
+.gh-wrap { height: 100%; overflow: auto; }
+.gh-profile {
+  padding: 22px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.gh-ava {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--r3);
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: var(--bg4);
+  border: 1px solid var(--line);
+}
+
+.gh-ava img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.gh-meta { flex: 1; min-width: 160px; }
+.gh-login { font-family: var(--f-display); font-size: 20px; font-weight: 700; color: var(--tx0); }
+.gh-bio { font-size: 13px; color: var(--tx1); margin-top: 5px; line-height: 1.5; }
+.gh-nums {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.gh-num { font-family: var(--f-mono); font-size: 12px; color: var(--tx2); }
+.gh-num b { color: var(--tx0); font-weight: 600; }
+
+.gh-section { padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.gh-section-title { font-family: var(--f-mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--tx2); margin-bottom: 14px; }
+
+.gh-repos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+
+.gh-repo {
+  border-radius: var(--r2);
+  border: 1px solid var(--line);
+  background: var(--bg1);
+  padding: 13px 15px;
+  transition: border-color .16s, background .16s;
+  cursor: default;
+}
+
+.gh-repo:hover { border-color: var(--line2); background: var(--bg2); }
+.gh-repo-name { font-size: 13px; font-weight: 600; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gh-repo-desc { font-size: 11.5px; color: var(--tx2); margin-top: 5px; line-height: 1.5; min-height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gh-repo-foot { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.gh-repo-lang { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--tx2); }
+.gh-repo-lang-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.gh-repo-stars { font-family: var(--f-mono); font-size: 11px; color: var(--tx2); }
+
+.gh-langs { display: flex; flex-direction: column; gap: 10px; }
+.gh-lang-row { display: grid; grid-template-columns: 90px 1fr 40px; gap: 10px; align-items: center; }
+.gh-lang-label { font-size: 12px; color: var(--tx1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gh-lang-bar { height: 5px; border-radius: 5px; background: var(--bg4); overflow: hidden; }
+.gh-lang-bar i { display: block; height: 100%; border-radius: inherit; transition: width 1s var(--ease-out); }
+.gh-lang-pct { font-family: var(--f-mono); font-size: 10.5px; color: var(--tx2); text-align: right; }
+
+.gh-loading {
+  padding: 40px 22px;
+  text-align: center;
+  color: var(--tx2);
+  font-size: 13px;
+}
+
+.gh-error {
+  padding: 40px 22px;
+  text-align: center;
+  color: var(--bad);
+  font-size: 13px;
+}
+
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
+.ach-wrap { height: 100%; overflow: auto; }
+.ach-banner {
+  padding: 22px 22px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ach-banner-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r3);
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--accent) 70%, transparent), color-mix(in srgb, var(--accent) 30%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.ach-banner h1 { font-size: 20px; }
+.ach-banner p { font-size: 12.5px; color: var(--tx2); margin-top: 3px; }
+
+.ach-list { padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+
+.ach-card {
+  border-radius: var(--r3);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: border-color .16s;
+}
+
+.ach-card:hover { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+
+.ach-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r2);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.ach-card-body { flex: 1; min-width: 0; }
+.ach-card-title { font-size: 14px; font-weight: 600; color: var(--tx0); }
+.ach-card-when { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; color: var(--tx2); margin-top: 3px; }
+.ach-card-detail { font-size: 13px; color: var(--tx1); margin-top: 7px; line-height: 1.6; }
   </style>
 </head>
 <body>
@@ -1797,11 +2326,11 @@ const PROFILE = {
   name: "Bilal Rauf",
   handle: "bilal",
   osName: "AXIOM OS",
-  build: "3.0.1",
+  build: "3.1.0",
   role: "Full-Stack Developer",
   focus: "Frontend engineering · Blue Team security",
   location: "Lahore, Pakistan",
-  email: "your.email@example.com",
+  email: "bilal.rauf2004@outlook.com",
   cvFile: "Bilal_Rauf_CV.pdf",
   available: true,
   summary:
@@ -1915,6 +2444,24 @@ const PROFILE = {
       url: "https://github.com/Build-with-AI-FAST-CFD-26/ai-hackathon-submission-bz-force"
     },
     {
+      name: "Stack Sense",
+      kind: "AI-powered web app",
+      year: "2026",
+      status: "Shipped",
+      description:
+        "An AI-powered developer assistant built and deployed in 24 hours during the GDGoC FAST NUCES hackathon — placed 5th competing against university teams.",
+      detail:
+        "The key constraint was time. We had one day and a small team, so we made a hard scope decision early: one complete AI loop executed well beats four half-finished features. The assistant uses Google AI (Gemini) to help users understand code errors, debug logic, and get contextual programming guidance — delivered through a React frontend backed by Firebase.",
+      highlights: [
+        "Built and deployed a full AI feedback loop in under 24 hours",
+        "Integrated Gemini API for contextual code explanation and debugging",
+        "Deployed to Firebase and Google Cloud under time pressure",
+        "Collaborated under a live demo deadline — presented and judged"
+      ],
+      stack: ["React", "Firebase", "Google Cloud", "Gemini API"],
+      url: "https://github.com/Build-with-AI-FAST-CFD-26/ai-hackathon-submission-bz-force"
+    },
+    {
       name: "Portfolio Desktop",
       kind: "Interface experiment",
       year: "2026",
@@ -1935,6 +2482,16 @@ const PROFILE = {
   ],
 
   experience: [
+    {
+      date: "Summer 2026",
+      role: "Web Developer Intern",
+      org: "InAmigos Foundation — Remote",
+      current: true,
+      points: [
+        "Built and deployed a full-stack MERN website for a social-good organisation, integrating a Google Gemini-powered chat assistant with a secure server-side API architecture.",
+        "Delivered structured weekly assignments end-to-end — from Figma design to deployment on Google Cloud and Firebase — meeting fixed deadlines."
+      ]
+    },
     {
       date: "2026 — Present",
       role: "Blue Team Security Intern",
@@ -1958,24 +2515,45 @@ const PROFILE = {
       ]
     },
     {
-      date: "2024 — Present",
-      role: "BS Computer Science",
-      org: "University — Lahore",
-      current: true,
+      date: "Summer 2025",
+      role: "Intern",
+      org: "Solutionsloft",
+      current: false,
       points: [
-        "Core coursework in data structures, algorithms, databases and networks.",
-        "Hackathon participation and team project work alongside the degree."
+        "Wrote SQL queries against relational databases under senior-developer mentorship in a professional workflow.",
+        "Gained exposure to a professional workplace environment and industry practices."
       ]
     },
     {
-      date: "2024 — 2025",
-      role: "Freelance & personal projects",
-      org: "Self-directed",
-      current: false,
+      date: "2024 — Present",
+      role: "BS Computer Science",
+      org: "FAST NUCES — Lahore · CGPA 3.53",
+      current: true,
       points: [
-        "Shipped full-stack projects end to end, from schema design to deployment.",
-        "Wrote technical documentation and project write-ups to keep the work legible."
+        "Core coursework in data structures, algorithms, databases and networks.",
+        "Hackathon participation (placed 5th at GDGoC 24-hour AI Hackathon) and team project work alongside the degree."
       ]
+    }
+  ],
+
+  achievements: [
+    {
+      icon: "award",
+      title: "5th Place — GDGoC FAST NUCES AI Hackathon",
+      when: "2026",
+      detail: "Built and deployed Stack Sense, an AI-powered developer assistant using Gemini API, Firebase and Google Cloud — competing against university teams under a 24-hour deadline."
+    },
+    {
+      icon: "award",
+      title: "Bronze Medal — Academic Excellence",
+      when: "Fall 2025",
+      detail: "Awarded for academic performance during the Fall 2025 semester at FAST National University."
+    },
+    {
+      icon: "spark",
+      title: "3.53 CGPA — FAST NUCES",
+      when: "2024 — present",
+      detail: "Maintaining a 3.53 GPA across the BS Computer Science programme while shipping production projects and running security labs in parallel."
     }
   ],
 
@@ -2095,7 +2673,15 @@ const ICONS = {
   code: '<path d="m8.4 8.4-4 3.6 4 3.6"/><path d="m15.6 8.4 4 3.6-4 3.6"/><path d="m13.6 5.4-3.2 13.2"/>',
   mapPin: '<path d="M19 10.4c0 5.2-7 10.4-7 10.4s-7-5.2-7-10.4a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10.2" r="2.6"/>',
   spark: '<path d="M12 3.4 13.9 9l5.6 1.9-5.6 1.9L12 18.4 10.1 12.8 4.5 10.9 10.1 9 12 3.4Z"/>',
-  book: '<path d="M4.4 5.2A1.8 1.8 0 0 1 6.2 3.4h13.4v14.2H6.2a1.8 1.8 0 0 0-1.8 1.8V5.2Z"/><path d="M4.4 19.4a1.8 1.8 0 0 0 1.8 1.8h13.4"/>'
+  book: '<path d="M4.4 5.2A1.8 1.8 0 0 1 6.2 3.4h13.4v14.2H6.2a1.8 1.8 0 0 0-1.8 1.8V5.2Z"/><path d="M4.4 19.4a1.8 1.8 0 0 0 1.8 1.8h13.4"/>',
+  play: '<path d="M7.4 5.2v13.6L18.8 12 7.4 5.2Z" fill="currentColor" stroke="none"/>',
+  pause: '<rect x="5.2" y="4.4" width="4.4" height="15.2" rx="1.2" fill="currentColor" stroke="none"/><rect x="14.4" y="4.4" width="4.4" height="15.2" rx="1.2" fill="currentColor" stroke="none"/>',
+  award: '<circle cx="12" cy="8.6" r="5.2"/><path d="m8.6 13.4-1.2 7.2L12 18.4l4.6 2.2-1.2-7.2"/><path d="m9.8 8.6 1.4 1.4 3.2-3.2"/>',
+  alarm: '<circle cx="12" cy="13" r="7.2"/><path d="M12 10.2V13l2 2"/><path d="M4.4 5.2 7 7.6M19.6 5.2 17 7.6"/>',
+  cpu: '<rect x="5.4" y="5.4" width="13.2" height="13.2" rx="1.8"/><rect x="8.6" y="8.6" width="6.8" height="6.8" rx=".8"/><path d="M8.6 3.4v2M12 3.4v2M15.4 3.4v2M8.6 18.6v2M12 18.6v2M15.4 18.6v2M3.4 8.6h2M3.4 12h2M3.4 15.4h2M18.6 8.6h2M18.6 12h2M18.6 15.4h2"/>',
+  music: '<path d="M9 18.2V5.4l10.2-2.2v12.8"/><circle cx="6.2" cy="18.2" r="2.8"/><circle cx="16.4" cy="16" r="2.8"/>',
+  chart: '<path d="M4.4 17.6l4.8-5.6 4 3.2 5.2-8"/><path d="M3.4 20.6h17.2"/>',
+  zap: '<path d="M13.4 2.6 5 13.8h7.2L9.8 21.4l11.4-11.2H14L13.4 2.6Z" fill="currentColor" stroke="none"/>'
 };
 
 function svg(name, size) {
@@ -3034,6 +3620,171 @@ const APPS = {
     mount(win) { mountSettings(win); }
   },
 
+  /* ---------------------------------------------------- ACHIEVEMENTS */
+  achievements: {
+    title: "Achievements", icon: "award", w: 640, h: 520, desk: true,
+    render: () => `
+      <div class="ach-wrap">
+        <div class="ach-banner">
+          <div class="ach-banner-icon">${svg("award", 24)}</div>
+          <div>
+            <h1 class="h-md">Achievements</h1>
+            <p>Recognition, medals and milestones so far.</p>
+          </div>
+        </div>
+        <div class="ach-list">
+          ${PROFILE.achievements.map(a => `
+            <div class="ach-card">
+              <div class="ach-card-icon">${svg(a.icon, 20)}</div>
+              <div class="ach-card-body">
+                <div class="ach-card-title">${esc(a.title)}</div>
+                <div class="ach-card-when">${esc(a.when)}</div>
+                <div class="ach-card-detail">${esc(a.detail)}</div>
+              </div>
+            </div>`).join("")}
+        </div>
+      </div>`
+  },
+
+  /* ---------------------------------------------------- TIMER (Pomodoro) */
+  timer: {
+    title: "Focus Timer", icon: "alarm", w: 380, h: 540, desk: true,
+    render: () => `
+      <div class="timer-wrap">
+        <div class="timer-modes" id="timerModes">
+          <button class="timer-mode on" data-mins="25" data-label="Focus">Focus</button>
+          <button class="timer-mode" data-mins="5" data-label="Short break">Short break</button>
+          <button class="timer-mode" data-mins="15" data-label="Long break">Long break</button>
+        </div>
+
+        <div class="timer-ring-wrap">
+          <svg viewBox="0 0 200 200" width="200" height="200">
+            <circle class="timer-ring-bg" cx="100" cy="100" r="90"/>
+            <circle class="timer-ring-fg" id="timerRing" cx="100" cy="100" r="90"/>
+          </svg>
+          <div class="timer-display">
+            <div class="timer-time" id="timerDisplay">25:00</div>
+            <div class="timer-label" id="timerLabel">Focus</div>
+          </div>
+        </div>
+
+        <div class="timer-controls">
+          <button class="timer-btn" id="timerReset" title="Reset">${svg("refresh", 18)}</button>
+          <button class="timer-btn primary" id="timerToggle">${svg("play", 22)}</button>
+          <button class="timer-btn" id="timerSkip" title="Skip">${svg("arrow", 18)}</button>
+        </div>
+
+        <div class="timer-sessions" id="timerSessions">
+          <div class="timer-dot"></div>
+          <div class="timer-dot"></div>
+          <div class="timer-dot"></div>
+          <div class="timer-dot"></div>
+        </div>
+      </div>`,
+    mount(win) { mountTimer(win); }
+  },
+
+  /* ---------------------------------------------------- SYSMON */
+  sysmon: {
+    title: "Activity Monitor", icon: "cpu", w: 760, h: 560, desk: true,
+    render: () => `
+      <div class="sysmon">
+        <div class="sysmon-tabs" id="sysmonTabs">
+          <button class="sysmon-tab on" data-tab="cpu">CPU</button>
+          <button class="sysmon-tab" data-tab="memory">Memory</button>
+          <button class="sysmon-tab" data-tab="processes">Processes</button>
+        </div>
+        <div class="sysmon-pane on" id="sysmonCpu">
+          <div class="sysmon-stat-grid" id="sysmonStats"></div>
+          <div class="sysmon-graph-wrap">
+            <div class="sysmon-graph-head">
+              <b>CPU History</b>
+              <span id="sysmonCpuVal">—</span>
+            </div>
+            <div class="sysmon-canvas-wrap" id="sysmonGraphWrap">
+              <canvas id="sysmonCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="sysmon-pane" id="sysmonMemory">
+          <div class="sysmon-stat-grid" id="sysmonMemStats"></div>
+          <div style="border-radius:var(--r2);border:1px solid var(--line);background:var(--bg1);overflow:hidden">
+            <div class="sysmon-proc-head"><span>Domain</span><span></span><span>Used</span><span>Capacity</span></div>
+            <div id="sysmonMemList"></div>
+          </div>
+        </div>
+        <div class="sysmon-pane" id="sysmonProcesses">
+          <div style="border-radius:var(--r2);border:1px solid var(--line);background:var(--bg1);overflow:hidden">
+            <div class="sysmon-proc-head"><span>Process</span><span>PID</span><span style="text-align:right">CPU%</span><span style="text-align:right">Status</span></div>
+            <div id="sysmonProcList"></div>
+          </div>
+        </div>
+      </div>`,
+    mount(win) { mountSysmon(win); }
+  },
+
+  /* ---------------------------------------------------- MUSIC */
+  music: {
+    title: "Focus Music", icon: "music", w: 480, h: 560, desk: true,
+    render: () => `
+      <div class="music-wrap">
+        <div class="music-head">
+          <div class="music-now">
+            <div class="music-art" id="musicArt">🎵</div>
+            <div class="music-info">
+              <div class="music-title" id="musicTitle">Select a scene</div>
+              <div class="music-sub" id="musicSub">Ambient sounds · Web Audio</div>
+            </div>
+            <div class="music-vis" id="musicVis">
+              ${Array.from({length: 8}, (_, i) => '<div class="music-bar" id="mbar' + i + '" style="height:6px"></div>').join("")}
+            </div>
+          </div>
+          <div class="music-ctrl">
+            <button class="music-ctrl-btn" id="musicVol" title="Toggle mute">${svg("music", 16)}</button>
+            <button class="music-play-btn" id="musicPlay">${svg("play", 20)}</button>
+            <div class="music-vol">
+              <span>${svg("music", 14)}</span>
+              <input type="range" id="musicVolume" min="0" max="100" value="60" />
+            </div>
+          </div>
+        </div>
+        <div class="music-scenes">
+          <div class="music-scenes-label">Soundscapes</div>
+          <div class="music-grid">
+            <button class="music-scene" data-scene="focus">
+              <span class="music-scene-icon">🧠</span>
+              <span><span class="music-scene-name">Deep Focus</span><span class="music-scene-desc">Binaural tones, no distractions</span></span>
+            </button>
+            <button class="music-scene" data-scene="rain">
+              <span class="music-scene-icon">🌧️</span>
+              <span><span class="music-scene-name">Rain</span><span class="music-scene-desc">Steady rainfall, ambient hiss</span></span>
+            </button>
+            <button class="music-scene" data-scene="forest">
+              <span class="music-scene-icon">🌲</span>
+              <span><span class="music-scene-name">Forest</span><span class="music-scene-desc">Wind, leaves, distant birds</span></span>
+            </button>
+            <button class="music-scene" data-scene="cosmos">
+              <span class="music-scene-icon">🌌</span>
+              <span><span class="music-scene-name">Cosmos</span><span class="music-scene-desc">Slow drifting pads, deep bass</span></span>
+            </button>
+          </div>
+        </div>
+      </div>`,
+    mount(win) { mountMusic(win); }
+  },
+
+  /* ---------------------------------------------------- GITHUB STATS */
+  githubstats: {
+    title: "GitHub", icon: "github", w: 760, h: 580, desk: true,
+    render: () => `
+      <div class="gh-wrap">
+        <div class="gh-loading" id="ghContent">
+          ${svg("github", 24)}<br><br>Loading profile…
+        </div>
+      </div>`,
+    mount(win) { mountGithub(win); }
+  },
+
   /* ---------------------------------------------------- ACCOUNT */
   account: {
     title: "Account", icon: "lock", w: 560, h: 420,
@@ -3083,9 +3834,11 @@ function mountTerminal(win) {
   const CMDS = {
     help: () => [
       '<span class="term-hi">Available commands</span>',
-      '  <span class="term-ok">help</span>        this list',
-      '  <span class="term-ok">whoami</span>      short introduction',
-      '  <span class="term-ok">skills</span>      capability summary',
+      '  <span class="term-ok">help</span>           this list',
+      '  <span class="term-ok">whoami</span>         short introduction',
+      '  <span class="term-ok">skills</span>         capability summary',
+      '  <span class="term-ok">achievements</span>   awards & recognition',
+      '  <span class="term-ok">quote</span>          random dev quote',
       '  <span class="term-ok">projects</span>    project index',
       '  <span class="term-ok">exp</span>         experience timeline',
       '  <span class="term-ok">security</span>    blue team casework',
@@ -3112,6 +3865,15 @@ function mountTerminal(win) {
     projects: () => PROFILE.projects.map(p =>
       `<span class="term-ok">${esc(p.name)}</span> <span class="term-dim">(${esc(p.year)} · ${esc(p.kind)})</span>\n  ${esc(p.description)}\n  <a href="${p.url}" target="_blank" rel="noreferrer">${esc(p.url)}</a>`
     ).join("\n\n"),
+
+    achievements: () => PROFILE.achievements.map((a, i) =>
+      `<span class="term-ok">[${i + 1}]</span> <span class="term-hi">${esc(a.title)}</span> <span class="term-dim">${esc(a.when)}</span>\n  ${esc(a.detail)}`
+    ).join("\n\n"),
+
+    quote: () => {
+      const q = PROFILE.quotes[Math.floor(Math.random() * PROFILE.quotes.length)];
+      return `<span class="term-hi">"${esc(q)}"</span>`;
+    },
 
     exp: () => PROFILE.experience.map(e =>
       `<span class="term-dim">${esc(e.date)}</span>\n<span class="term-hi">${esc(e.role)}</span> — ${esc(e.org)}`
@@ -3158,7 +3920,7 @@ function mountTerminal(win) {
     }
   };
 
-  const NAMES = Object.keys(CMDS).concat(["open", "theme", "accent", "clear", "sudo", "exit"]);
+  const NAMES = Object.keys(CMDS).concat(["open", "theme", "accent", "wall", "clear", "sudo", "exit"]);
 
   const run = raw => {
     const line = raw.trim();
@@ -3193,6 +3955,15 @@ function mountTerminal(win) {
       if (!a) { say("Available accents: " + ACCENTS.map(x => x.id).join(", "), "term-bad"); return; }
       SHELL.accent = a.id; store.set("accent", a.id); applyAccent();
       say("Accent set to " + a.label + ".", "term-ok");
+      return;
+    }
+
+    if (c === "wall") {
+      const id = (args[0] || "").toLowerCase();
+      const w = WALLS.find(x => x.id === id);
+      if (!w) { say("Available wallpapers: " + WALLS.map(x => x.id).join(", "), "term-bad"); return; }
+      SHELL.wall = w.id; store.set("wall", w.id); applyWall();
+      say("Wallpaper set to " + w.label + ".", "term-ok");
       return;
     }
 
@@ -3254,6 +4025,10 @@ const FS = {
     label: "Utilities",
     items: [
       { name: "terminal", kind: "Application", size: "—", open: "terminal" },
+      { name: "focus-timer", kind: "Application", size: "—", open: "timer" },
+      { name: "focus-music", kind: "Application", size: "—", open: "music" },
+      { name: "activity-monitor", kind: "Application", size: "—", open: "sysmon" },
+      { name: "github-stats", kind: "Application", size: "—", open: "githubstats" },
       { name: "calculator", kind: "Application", size: "—", open: "calculator" },
       { name: "minesweeper", kind: "Application", size: "—", open: "minesweeper" },
       { name: "settings", kind: "Application", size: "—", open: "settings" }
@@ -3506,6 +4281,464 @@ function mountSettings(win) {
 }
 
 /* ============================================================
+   POMODORO TIMER
+   ============================================================ */
+function mountTimer(win) {
+  const MODES = [
+    { label: "Focus", mins: 25, color: "var(--accent)" },
+    { label: "Short break", mins: 5, color: "var(--ok)" },
+    { label: "Long break", mins: 15, color: "var(--warn)" }
+  ];
+
+  const CIRCUMFERENCE = 2 * Math.PI * 90; // r=90
+  let mode = 0, secs = 0, total = 0, running = false, interval = null;
+  let sessions = 0;
+
+  const ring = $("#timerRing", win);
+  const display = $("#timerDisplay", win);
+  const label = $("#timerLabel", win);
+  const toggleBtn = $("#timerToggle", win);
+  const dots = $$(".timer-dot", win);
+
+  function setMode(m) {
+    mode = m;
+    $$(".timer-mode", win).forEach((b, i) => b.classList.toggle("on", i === m));
+    total = MODES[m].mins * 60;
+    secs = total;
+    ring.style.stroke = MODES[m].color;
+    label.textContent = MODES[m].label;
+    pause();
+    draw();
+  }
+
+  function draw() {
+    const m = Math.floor(secs / 60), s = secs % 60;
+    display.textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    const pct = total > 0 ? (total - secs) / total : 0;
+    ring.style.strokeDashoffset = CIRCUMFERENCE * (1 - pct);
+    ring.style.strokeDasharray = CIRCUMFERENCE;
+  }
+
+  function tick() {
+    if (secs <= 0) {
+      pause();
+      toast(MODES[mode].label + " complete!", "check");
+      if (mode === 0) {
+        sessions = Math.min(4, sessions + 1);
+        dots.forEach((d, i) => d.classList.toggle("done", i < sessions));
+        if (sessions >= 4) { sessions = 0; dots.forEach(d => d.classList.remove("done")); toast("4 sessions done — take a long break", "award"); }
+      }
+      return;
+    }
+    secs--;
+    draw();
+  }
+
+  function play() {
+    if (running) return;
+    running = true;
+    interval = setInterval(tick, 1000);
+    toggleBtn.innerHTML = svg("pause", 22);
+  }
+
+  function pause() {
+    running = false;
+    clearInterval(interval);
+    toggleBtn.innerHTML = svg("play", 22);
+  }
+
+  toggleBtn.addEventListener("click", () => running ? pause() : play());
+  $("#timerReset", win).addEventListener("click", () => { pause(); secs = total; draw(); });
+  $("#timerSkip", win).addEventListener("click", () => { pause(); setMode((mode + 1) % MODES.length); });
+  $$(".timer-mode", win).forEach((b, i) => b.addEventListener("click", () => setMode(i)));
+
+  win._cleanup = () => clearInterval(interval);
+  setMode(0);
+}
+
+/* ============================================================
+   ACTIVITY MONITOR
+   ============================================================ */
+function mountSysmon(win) {
+  const procs = [
+    { name: "next-dev", pid: 1024, cpu: 14.2, status: "Running" },
+    { name: "tsc --watch", pid: 1031, cpu: 8.7, status: "Running" },
+    { name: "suricata", pid: 2048, cpu: 4.1, status: "Active" },
+    { name: "wazuh-agent", pid: 2049, cpu: 2.8, status: "Active" },
+    { name: "react.render", pid: 3001, cpu: 6.4, status: "Running" },
+    { name: "postgres", pid: 3200, cpu: 1.2, status: "Idle" },
+    { name: "axiom-sh", pid: 4096, cpu: 0.4, status: "Running" },
+    { name: "eslint --fix", pid: 4200, cpu: 3.1, status: "Running" },
+    { name: "git fetch", pid: 4400, cpu: 0.9, status: "Sleeping" },
+    { name: "kali-vm", pid: 5000, cpu: 18.6, status: "Active" }
+  ];
+
+  const memDomains = PROFILE.skills.map(g => ({
+    name: g.group,
+    used: Math.round(g.items.reduce((a, s) => a + s.level, 0) / g.items.length),
+    capacity: 100
+  }));
+
+  const cpuHistory = Array.from({ length: 60 }, () => Math.random() * 40 + 10);
+  let graphInterval = null;
+
+  // render processes
+  const procList = $("#sysmonProcList", win);
+  procList.innerHTML = procs.map(p =>
+    `<div class="sysmon-proc-row">
+      <span class="name">${esc(p.name)}</span>
+      <span class="pid">${p.pid}</span>
+      <span class="cpu-val">${p.cpu.toFixed(1)}</span>
+      <span class="stat">${esc(p.status)}</span>
+    </div>`
+  ).join("");
+
+  // render memory domain bars
+  const memList = $("#sysmonMemList", win);
+  memList.innerHTML = memDomains.map(d =>
+    `<div class="sysmon-proc-row">
+      <span class="name">${esc(d.name)}</span>
+      <span class="pid"></span>
+      <span class="mem-val">${d.used}%</span>
+      <span class="stat">${d.capacity}%</span>
+    </div>`
+  ).join("");
+
+  // stat tiles
+  const totalCpu = procs.reduce((a, p) => a + p.cpu, 0).toFixed(1);
+  const statsWrap = $("#sysmonStats", win);
+  statsWrap.innerHTML = [
+    { label: "CPU", value: totalCpu + "%", bar: parseFloat(totalCpu) },
+    { label: "Memory", value: "3.4 GB", bar: 62 },
+    { label: "Processes", value: procs.length, bar: (procs.length / 20) * 100 }
+  ].map(s => `
+    <div class="sysmon-stat">
+      <small>${s.label}</small>
+      <b>${s.value}</b>
+      <div class="bar"><i id="sysmonBar${s.label}" style="width:0%"></i></div>
+    </div>`).join("");
+
+  const memStats = $("#sysmonMemStats", win);
+  memStats.innerHTML = [
+    { label: "Skill coverage", value: memDomains.length + " groups", bar: 80 },
+    { label: "Top group", value: memDomains.sort((a, b) => b.used - a.used)[0].name, bar: memDomains[0].used },
+    { label: "Avg proficiency", value: Math.round(memDomains.reduce((a, d) => a + d.used, 0) / memDomains.length) + "%", bar: Math.round(memDomains.reduce((a, d) => a + d.used, 0) / memDomains.length) }
+  ].map(s => `
+    <div class="sysmon-stat">
+      <small>${s.label}</small>
+      <b>${s.value}</b>
+      <div class="bar"><i style="width:${s.bar}%"></i></div>
+    </div>`).join("");
+
+  setTimeout(() => {
+    ["CPU", "Memory", "Processes"].forEach(k => {
+      const el = $("#sysmonBar" + k, win);
+      if (!el) return;
+      const pct = k === "CPU" ? parseFloat(totalCpu) : k === "Memory" ? 62 : (procs.length / 20) * 100;
+      el.style.width = Math.min(100, pct) + "%";
+    });
+  }, 60);
+
+  // canvas graph
+  function drawGraph() {
+    const wrap = $("#sysmonGraphWrap", win);
+    const canvas = $("#sysmonCanvas", win);
+    if (!canvas || !wrap) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = wrap.clientWidth, H = 60;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#5b7cfa";
+    ctx.clearRect(0, 0, W, H);
+    ctx.beginPath();
+    cpuHistory.forEach((v, i) => {
+      const x = (i / (cpuHistory.length - 1)) * W;
+      const y = H - (v / 100) * H;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.lineTo(W, H); ctx.lineTo(0, H);
+    ctx.fillStyle = accent + "22";
+    ctx.fill();
+
+    const cur = cpuHistory[cpuHistory.length - 1];
+    const cpuVal = $("#sysmonCpuVal", win);
+    if (cpuVal) cpuVal.textContent = cur.toFixed(1) + "%";
+  }
+
+  graphInterval = setInterval(() => {
+    const last = cpuHistory[cpuHistory.length - 1];
+    const next = Math.max(5, Math.min(95, last + (Math.random() - 0.46) * 12));
+    cpuHistory.push(next);
+    if (cpuHistory.length > 60) cpuHistory.shift();
+    drawGraph();
+  }, 1200);
+
+  // tabs
+  $$(".sysmon-tab", win).forEach(t => t.addEventListener("click", () => {
+    $$(".sysmon-tab", win).forEach(x => x.classList.remove("on"));
+    $$(".sysmon-pane", win).forEach(x => x.classList.remove("on"));
+    t.classList.add("on");
+    const paneId = { cpu: "#sysmonCpu", memory: "#sysmonMemory", processes: "#sysmonProcesses" }[t.dataset.tab];
+    const pane = $(paneId, win);
+    if (pane) { pane.classList.add("on"); }
+    if (t.dataset.tab === "cpu") setTimeout(drawGraph, 30);
+  }));
+
+  setTimeout(drawGraph, 80);
+  win._cleanup = () => clearInterval(graphInterval);
+}
+
+/* ============================================================
+   FOCUS MUSIC (Web Audio API — no external deps)
+   ============================================================ */
+function mountMusic(win) {
+  let ctx = null, masterGain = null, activeNodes = [], playing = false, activeScene = null;
+  let visInterval = null;
+  const bars = Array.from({ length: 8 }, (_, i) => win.querySelector("#mbar" + i));
+
+  const SCENES = {
+    focus: {
+      name: "Deep Focus",
+      emoji: "🧠",
+      desc: "Binaural tones · 40 Hz gamma carrier",
+      build(ac, master) {
+        const osc1 = ac.createOscillator(), osc2 = ac.createOscillator();
+        osc1.type = "sine"; osc2.type = "sine";
+        osc1.frequency.value = 200; osc2.frequency.value = 240; // 40Hz binaural beat
+        const g = ac.createGain(); g.gain.value = 0.12;
+        const merger = ac.createChannelMerger(2);
+        const g1 = ac.createGain(); g1.gain.value = 1;
+        const g2 = ac.createGain(); g2.gain.value = 1;
+        osc1.connect(g1); g1.connect(merger, 0, 0);
+        osc2.connect(g2); g2.connect(merger, 0, 1);
+        merger.connect(g); g.connect(master);
+        osc1.start(); osc2.start();
+        return [osc1, osc2, g, g1, g2, merger];
+      }
+    },
+    rain: {
+      name: "Rain",
+      emoji: "🌧️",
+      desc: "Brown noise · steady rainfall",
+      build(ac, master) {
+        const bufLen = ac.sampleRate * 4;
+        const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+        const d = buf.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < bufLen; i++) { last = (Math.random() * 2 - 1 + last * 6) / 7; d[i] = last * 3.5; }
+        const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+        const filter = ac.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 800;
+        const g = ac.createGain(); g.gain.value = 0.35;
+        src.connect(filter); filter.connect(g); g.connect(master); src.start();
+        return [src, filter, g];
+      }
+    },
+    forest: {
+      name: "Forest",
+      emoji: "🌲",
+      desc: "Wind noise · light breeze",
+      build(ac, master) {
+        const bufLen = ac.sampleRate * 3;
+        const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * 0.8;
+        const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+        const hp = ac.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 300;
+        const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2400;
+        const lfo = ac.createOscillator(); lfo.frequency.value = 0.12; lfo.type = "sine";
+        const lfoGain = ac.createGain(); lfoGain.gain.value = 0.08;
+        const g = ac.createGain(); g.gain.value = 0.22;
+        src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(master);
+        lfo.connect(lfoGain); lfoGain.connect(g.gain);
+        src.start(); lfo.start();
+        return [src, hp, lp, lfo, lfoGain, g];
+      }
+    },
+    cosmos: {
+      name: "Cosmos",
+      emoji: "🌌",
+      desc: "Slow drifting pads · deep space",
+      build(ac, master) {
+        const nodes = [];
+        const freqs = [55, 82.5, 110, 165];
+        freqs.forEach(f => {
+          const osc = ac.createOscillator(); osc.type = "sine"; osc.frequency.value = f;
+          const g = ac.createGain(); g.gain.value = 0.06;
+          const lfo = ac.createOscillator(); lfo.frequency.value = 0.05 + Math.random() * 0.1;
+          const lfog = ac.createGain(); lfog.gain.value = 0.03;
+          osc.connect(g); g.connect(master);
+          lfo.connect(lfog); lfog.connect(g.gain);
+          osc.start(); lfo.start();
+          nodes.push(osc, g, lfo, lfog);
+        });
+        return nodes;
+      }
+    }
+  };
+
+  function stopAll() {
+    activeNodes.forEach(n => { try { n.stop && n.stop(); n.disconnect && n.disconnect(); } catch (e) {} });
+    activeNodes = [];
+  }
+
+  function startScene(id) {
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = ctx.createGain();
+      masterGain.gain.value = parseFloat($("#musicVolume", win).value) / 100;
+      masterGain.connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    stopAll();
+    const scene = SCENES[id];
+    activeNodes = scene.build(ctx, masterGain);
+    activeScene = id;
+    playing = true;
+    $("#musicTitle", win).textContent = scene.name;
+    $("#musicSub", win).textContent = scene.desc;
+    $("#musicArt", win).textContent = scene.emoji;
+    $("#musicPlay", win).innerHTML = svg("pause", 20);
+    $$(".music-scene", win).forEach(b => b.classList.toggle("on", b.dataset.scene === id));
+    startVis();
+  }
+
+  function stopScene() {
+    stopAll();
+    playing = false;
+    clearInterval(visInterval);
+    bars.forEach(b => { if (b) b.style.height = "4px"; });
+    $("#musicPlay", win).innerHTML = svg("play", 20);
+  }
+
+  function startVis() {
+    clearInterval(visInterval);
+    const heights = [4, 8, 14, 10, 18, 12, 7, 15];
+    visInterval = setInterval(() => {
+      if (!playing) return;
+      bars.forEach((b, i) => {
+        if (!b) return;
+        const h = Math.max(4, heights[i] + (Math.random() - 0.5) * 12);
+        heights[i] = Math.max(4, Math.min(26, h));
+        b.style.height = heights[i] + "px";
+      });
+    }, 120);
+  }
+
+  $$(".music-scene", win).forEach(b => b.addEventListener("click", () => {
+    if (activeScene === b.dataset.scene && playing) { stopScene(); return; }
+    startScene(b.dataset.scene);
+  }));
+
+  $("#musicPlay", win).addEventListener("click", () => {
+    if (playing) stopScene();
+    else if (activeScene) startScene(activeScene);
+    else toast("Select a soundscape first", "music");
+  });
+
+  $("#musicVolume", win).addEventListener("input", e => {
+    if (masterGain) masterGain.gain.value = parseFloat(e.target.value) / 100;
+  });
+
+  win._cleanup = () => {
+    stopScene();
+    if (ctx) ctx.close();
+  };
+}
+
+/* ============================================================
+   GITHUB STATS
+   ============================================================ */
+async function mountGithub(win) {
+  const HANDLE = PROFILE.links.github.split("/").pop();
+  const content = $("#ghContent", win);
+
+  const LANG_COLORS = {
+    JavaScript: "#f7df1e", TypeScript: "#3178c6", Python: "#3572a5",
+    CSS: "#563d7c", HTML: "#e34c26", "C++": "#f34b7d", Shell: "#89e051",
+    Dockerfile: "#384d54", SCSS: "#c6538c", MDX: "#fcb32c", default: "#8b949e"
+  };
+
+  try {
+    const [user, repos] = await Promise.all([
+      fetch("https://api.github.com/users/" + HANDLE).then(r => r.json()),
+      fetch("https://api.github.com/users/" + HANDLE + "/repos?sort=pushed&per_page=12").then(r => r.json())
+    ]);
+
+    if (user.message === "Not Found") throw new Error("User not found");
+
+    // count languages
+    const langCount = {};
+    repos.forEach(r => { if (r.language) langCount[r.language] = (langCount[r.language] || 0) + 1; });
+    const total = Object.values(langCount).reduce((a, b) => a + b, 0) || 1;
+    const topLangs = Object.entries(langCount).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+    content.parentElement.innerHTML = `
+      <div class="gh-profile">
+        <div class="gh-ava"><img src="${esc(user.avatar_url)}" alt="${esc(user.login)}" loading="lazy" /></div>
+        <div class="gh-meta">
+          <div class="gh-login">${esc(user.name || user.login)}</div>
+          <div class="gh-bio">${esc(user.bio || "Full-Stack Developer · Blue Team practitioner")}</div>
+          <div class="gh-nums">
+            <span class="gh-num"><b>${user.public_repos}</b> repos</span>
+            <span class="gh-num"><b>${user.followers}</b> followers</span>
+            <span class="gh-num"><b>${user.following}</b> following</span>
+            ${user.location ? '<span class="gh-num">📍 ' + esc(user.location) + "</span>" : ""}
+          </div>
+        </div>
+        <a class="btn ghost sm" href="${esc(user.html_url)}" target="_blank" rel="noreferrer" style="align-self:flex-start">
+          ${svg("external", 14)} Open profile
+        </a>
+      </div>
+
+      <div class="gh-section">
+        <div class="gh-section-title">Languages</div>
+        <div class="gh-langs" id="ghLangs">
+          ${topLangs.map(([lang, count]) => `
+            <div class="gh-lang-row">
+              <span class="gh-lang-label">${esc(lang)}</span>
+              <div class="gh-lang-bar">
+                <i id="ghl-${esc(lang.replace(/\s+/g, "-"))}" style="background:${LANG_COLORS[lang] || LANG_COLORS.default};width:0%"></i>
+              </div>
+              <span class="gh-lang-pct">${Math.round((count / total) * 100)}%</span>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="gh-section">
+        <div class="gh-section-title">Recent repositories</div>
+        <div class="gh-repos">
+          ${repos.slice(0, 8).map(r => `
+            <a class="gh-repo" href="${esc(r.html_url)}" target="_blank" rel="noreferrer" style="text-decoration:none">
+              <div class="gh-repo-name">${esc(r.name)}</div>
+              <div class="gh-repo-desc">${esc(r.description || "No description.")}</div>
+              <div class="gh-repo-foot">
+                ${r.language ? `<div class="gh-repo-lang"><span class="gh-repo-lang-dot" style="background:${LANG_COLORS[r.language] || LANG_COLORS.default}"></span>${esc(r.language)}</div>` : ""}
+                <span class="gh-repo-stars">⭐ ${r.stargazers_count}</span>
+              </div>
+            </a>`).join("")}
+        </div>
+      </div>`;
+
+    // animate language bars
+    setTimeout(() => {
+      topLangs.forEach(([lang, count]) => {
+        const el = win.querySelector("#ghl-" + lang.replace(/\s+/g, "-"));
+        if (el) el.style.width = Math.round((count / total) * 100) + "%";
+      });
+    }, 60);
+
+  } catch (err) {
+    content.innerHTML = `<div class="gh-error">${svg("github", 22)}<br><br>Could not load GitHub data.<br><small>Check your connection or the username in PROFILE.</small></div>`;
+  }
+}
+
+/* ============================================================
    AXIOM OS — shell wiring
    ============================================================ */
 const BOOT_AT = Date.now();
@@ -3626,7 +4859,8 @@ function renderWidgets() {
   $("#wgStats").innerHTML = [
     { n: PROFILE.projects.length, l: "Projects" },
     { n: PROFILE.skills.reduce((a, g) => a + g.items.length, 0), l: "Skills" },
-    { n: PROFILE.cases.length, l: "Cases" }
+    { n: PROFILE.cases.length, l: "Cases" },
+    { n: PROFILE.achievements.length, l: "Awards" }
   ].map(s => '<div class="wg-stat"><b>' + s.n + "</b><small>" + s.l + "</small></div>").join("");
 
   const q = $("#wgQuote");
@@ -3638,7 +4872,7 @@ function renderWidgets() {
     if (!reduced()) q.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "ease-out" });
   });
 
-  $("#wgJump").innerHTML = ["projects", "terminal", "notes", "security"]
+  $("#wgJump").innerHTML = ["projects", "terminal", "timer", "music", "security"]
     .map(id => '<button class="btn ghost sm" data-app="' + id + '">' + svg(APPS[id].icon, 14) + " " + esc(APPS[id].title) + "</button>").join("");
   $$("#wgJump [data-app]").forEach(b => b.addEventListener("click", () => { openApp(b.dataset.app, b); closePanels(); }));
 }
